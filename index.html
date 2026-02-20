@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Grow a Garden with Trastratravich: @Xn1ckname EDITION 1.6</title>
+    <style>
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: 'Arial Black', sans-serif; user-select: none; }
+        #game-screen { width: 100vw; height: 100vh; background-color: #82c91e; position: relative; transition: opacity 2s; }
+        .ui-header { position: absolute; top: 20px; left: 20px; right: 20px; display: flex; justify-content: space-between; align-items: flex-start; pointer-events: none; }
+        .title-box { background: white; padding: 15px 25px; border-radius: 15px; border: 4px solid #ccc; font-weight: bold; font-size: 22px; pointer-events: auto; box-shadow: 0 6px 0 #bbb; }
+        #garden-hint-text { color: #555; font-size: 14px; font-family: Arial, sans-serif; margin-top: 5px; display: none; }
+        .stats-column { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; pointer-events: auto; }
+        .white-plate { background: white; padding: 12px 30px; border-radius: 20px; border: 4px solid #ccc; display: flex; align-items: center; gap: 12px; font-weight: bold; font-size: 30px; box-shadow: 0 6px 0 #bbb; }
+        .lvl-plate { background: #a333c8; color: white; border: 3px solid #7a2099; padding: 8px 15px; font-size: 18px; border-radius: 10px; }
+        .xp-container { width: 280px; height: 40px; background: #cccccc; border: 4px solid #444; border-radius: 12px; position: relative; overflow: hidden; }
+        #xp-fill { height: 100%; width: 0%; background: #33e0ff; position: absolute; z-index: 1; transition: width 0.5s; }
+        #xp-text { position: absolute; width: 100%; text-align: center; line-height: 40px; font-weight: bold; font-size: 18px; z-index: 10; color: black; }
+        .coin-icon { width: 35px; height: 35px; background: #fcc419; border: 3px solid #f08c00; border-radius: 50%; position: relative; }
+        .coin-icon::after { content: '◆'; color: white; font-size: 20px; position: absolute; top: 1px; left: 8px; }
+        .side-menu { position: absolute; right: 30px; top: 55%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 25px; z-index: 100; }
+        .circle-btn { width: 110px; height: 110px; border: none; cursor: pointer; display: flex; justify-content: center; align-items: center; border-radius: 25px; box-shadow: 0 10px 0 rgba(0,0,0,0.3); transition: transform 0.1s; position: relative; }
+        .circle-btn:active { transform: translateY(5px); box-shadow: 0 5px 0 rgba(0,0,0,0.3); }
+        .btn-p { background: #b197fc; }
+        .btn-b { background: #1a0dab; }
+        .btn-r { background: #ff4d4d; }
+        
+        .msg-icon { width: 50px; height: 40px; background: white; border-radius: 8px; position: relative; }
+        .msg-icon::after { content: ''; position: absolute; bottom: -12px; left: 10px; border-left: 12px solid white; border-bottom: 12px solid transparent; }
+        .msg-lines { display: flex; flex-direction: column; gap: 4px; padding: 8px; }
+        .msg-line { height: 4px; background: #ff4d4d; border-radius: 2px; width: 100%; }
+        .msg-line.short { width: 60%; }
+
+        .notif-badge { position: absolute; top: -5px; left: -5px; background: red; color: white; border: 3px solid white; border-radius: 50%; width: 35px; height: 35px; font-size: 18px; display: none; justify-content: center; align-items: center; z-index: 10; }
+        .dots-circ { width: 80px; height: 80px; border: 6px solid white; border-radius: 50%; display: flex; justify-content: center; align-items: center; gap: 8px; }
+        .dot { width: 14px; height: 14px; background: white; border-radius: 50%; }
+        .modal { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; z-index: 500; width: 480px; border-radius: 30px; border: 6px solid #ccc; box-shadow: 0 0 100px rgba(0,0,0,0.5); }
+        .close-x { position: absolute; top: -20px; right: -20px; width: 65px; height: 65px; background: #fcc419; border: 5px solid white; border-radius: 50%; color: white; cursor: pointer; font-weight: bold; display: flex; justify-content: center; align-items: center; font-size: 40px; box-shadow: 0 6px 0 #bbb; }
+        #admin-cube { display: none; position: absolute; top: 20px; right: 20px; width: 100px; height: 100px; background: black; color: white; font-size: 14px; text-align: center; border: 4px solid white; cursor: move; z-index: 2000; align-items: center; justify-content: center; padding: 5px; box-sizing: border-box; }
+        .admin-modal { background: black !important; color: white !important; border: 6px solid #444 !important; }
+        .admin-btn { background: #222; color: #00ff00; border: 3px solid white; padding: 15px; width: 100%; margin: 10px 0; cursor: pointer; font-family: monospace; text-align: left; font-size: 16px; }
+        .admin-input { width: 93%; background: #111; border: 2px solid #00ff00; color: #00ff00; padding: 10px; font-family: monospace; margin-top: 10px; font-size: 16px; }
+        .confirm-btn { background: #00ff00; color: black; border: none; padding: 10px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 5px; border-radius: 5px; }
+        #global-announcement { display: none; position: absolute; bottom: 200px; left: 50%; transform: translateX(-50%) translateY(100px); width: 85%; min-height: 120px; background: white; border: 8px solid #000; border-radius: 30px; padding: 30px; z-index: 3000; transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        #global-announcement.show { display: block; transform: translateX(-50%) translateY(0); }
+        .owner-tag { position: absolute; top: -25px; left: 30px; background: #000; color: #fff; padding: 8px 25px; border-radius: 15px; font-size: 18px; }
+        .popup { position: absolute; font-weight: bold; animation: floatUp 1s forwards; z-index: 5000; font-size: 45px; pointer-events: none; text-shadow: 3px 3px 0 white; }
+        @keyframes floatUp { 0% { opacity: 0; transform: translateY(0); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(-150px); } }
+        .garden-plot, .antenna-plot { position: absolute; width: 140px; height: 140px; border: 6px solid white; transform: translate(-50%, -50%); cursor: pointer; background: rgba(255,255,255,0.3); display: flex; justify-content: center; align-items: center; border-radius: 20px; }
+        .garden-plot span, .antenna-plot span { font-size: 90px !important; }
+        #placement-hint { display: none; position: absolute; bottom: 250px; left: 50%; transform: translateX(-50%); background: white; padding: 20px 40px; border-radius: 20px; border: 6px solid #000; font-weight: bold; font-size: 24px; z-index: 1000; text-align: center; box-shadow: 0 10px 0 #ddd; color: black; max-width: 80%; }
+        #ending { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: black; z-index: 10000; color: white; flex-direction: column; justify-content: center; align-items: center; text-align: center; font-size: 35px; padding: 40px; line-height: 1.6; transition: opacity 3s; opacity: 0; box-sizing: border-box; }
+        button { font-size: 18px !important; }
+        #anti-cheat-screen { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: black; z-index: 20000; justify-content: center; align-items: center; color: red; font-size: 50px; font-weight: bold; text-align: center; flex-direction: column; }
+        
+        #robbery-alert { display: none; position: absolute; top: -400px; left: 50%; transform: translateX(-50%); width: 500px; background: white; border: 8px solid #ff4d4d; border-radius: 25px; padding: 20px; z-index: 4000; transition: top 0.8s cubic-bezier(0.6, -0.28, 0.735, 0.045); box-shadow: 0 20px 0 rgba(0,0,0,0.2); }
+        .robbery-btn { background: #82c91e; color: black; border: 4px solid #69a018; padding: 15px; width: 100%; border-radius: 15px; font-weight: bold; font-size: 22px; cursor: pointer; margin-top: 15px; box-shadow: 0 5px 0 #69a018; }
+        .robbery-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #69a018; }
+        .review-item { border-bottom: 2px solid #eee; padding: 10px 0; }
+        .lan-btn { background: #82c91e; color: black; border: none; padding: 15px 40px; font-weight: bold; border-radius: 15px; cursor: pointer; display: block; margin: 20px auto 0; font-size: 20px; }
+        
+        #robbery-timer { font-size: 30px; color: #ff4d4d; font-weight: bold; display: block; margin-top: 10px; }
+        .rep-dead-modal { text-align: center; border: 6px solid #ccc !important; }
+        .rep-btn-ok { background: #82c91e; color: white; border: none; padding: 15px 50px; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 20px; font-size: 20px; }
+    </style>
+</head>
+<body>
+
+<div id="anti-cheat-screen">
+    <div>Молодец, отправляйся на тот свет.</div>
+</div>
+
+<div id="game-screen">
+    <div class="ui-header">
+        <div class="title-box">
+            Grow a Garden with<br>Trastratravich
+            <div id="garden-hint-text">Следите за отзывами, чтобы знать мнение посетителей про ваш огород!</div>
+        </div>
+        <div class="stats-column">
+            <div class="white-plate"><div class="coin-icon"></div>Монеты: <span id="m-val">900</span></div>
+            <div class="lvl-plate">Текущий Уровень: <span id="l-val">1</span></div>
+            <div class="xp-container">
+                <div id="xp-text">0 / 100 XP</div>
+                <div id="xp-fill"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="robbery-alert">
+        <div style="background:#ff4d4d; color:white; padding:15px; margin:-20px -20px 15px -20px; border-radius:20px 20px 0 0; text-align:center; font-size:24px; font-weight:bold;">🚨 КРАЖА! 🚨</div>
+        <p style="text-align:center; font-weight:bold; font-size:18px;" id="robbery-msg">ПАРНИ КРАДУТ ВАШИ ФРУКТЫ, ОСТАНОВИТЕ ИХ!</p>
+        <div id="robbery-timer" style="text-align:center;">35</div>
+        <button class="robbery-btn" onclick="stopRobbery()">Вызвать подгон</button>
+    </div>
+
+    <div id="admin-cube">Админ Панель 1.6 🌿 @Xn1ckname</div>
+
+    <div id="global-announcement">
+        <div class="owner-tag">@Xn1ckname [Owner]</div>
+        <p id="announcement-text" style="color: black; margin: 15px 0 0 0; font-size: 26px; font-weight: bold; text-align: center;"></p>
+    </div>
+
+    <div id="placement-hint"></div>
+
+    <div class="side-menu">
+        <button class="circle-btn btn-r" onclick="handleReviewsClick()">
+            <div id="review-badge" class="notif-badge">0</div>
+            <div class="msg-icon">
+                <div class="msg-lines">
+                    <div class="msg-line"></div>
+                    <div class="msg-line"></div>
+                    <div class="msg-line short"></div>
+                </div>
+            </div>
+        </button>
+        <button class="circle-btn btn-p" id="menu-trigger-btn" onclick="openW('main-m')"><span style="font-size:70px; color:white;">☰</span></button>
+        <button class="circle-btn btn-b" id="trigger-btn">
+            <div class="dots-circ"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+        </button>
+    </div>
+
+    <div class="modal" id="review-no-garden">
+        <div style="background:#1a0dab; color:white; padding:15px; margin:-30px -30px 20px -30px; border-radius:30px 30px 0 0; text-align:center;">Отзывы в адрес вашего сада.</div>
+        <p style="text-align:center; font-weight:bold; font-size:20px;">Хмм, может тебе стоит сначала открыть свой сад? Возвращайся по-позже</p>
+        <button class="lan-btn" onclick="cls()">Лан.</button>
+    </div>
+
+    <div class="modal" id="review-empty-garden">
+        <div style="background:#1a0dab; color:white; padding:15px; margin:-30px -30px 20px -30px; border-radius:30px 30px 0 0; text-align:center;">Отзывы в адрес вашего сада.</div>
+        <p style="text-align:center; font-weight:bold; font-size:20px;">У вас нету никаких отзывов на данный момент, развивайте ваш сад</p>
+        <button class="lan-btn" onclick="cls()">Лан.</button>
+    </div>
+
+    <div class="modal" id="review-list-modal">
+        <div class="close-x" onclick="cls()">×</div>
+        <div style="background:#1a0dab; color:white; padding:15px; margin:-30px -30px 20px -30px; border-radius:30px 30px 0 0; text-align:center;">Отзывы в адрес вашего сада.</div>
+        <div id="reviews-container" style="max-height:400px; overflow-y:auto; padding-right:10px;"></div>
+    </div>
+
+    <div class="modal" id="rep-dead-m" class="rep-dead-modal">
+        <div style="background:#ff4d4d; color:white; padding:15px; margin:-30px -30px 20px -30px; border-radius:30px 30px 0 0; text-align:center; font-size:24px; font-weight:bold;">Репутация Мертва</div>
+        <p style="color:black; font-size:18px; text-align:center; font-weight:bold; margin-top:20px;">Все ваши сады, были ограничены, и закрыты навсегда, по-причине — ужасной внимательности, от которой посетители были в ужасе. С этого момента, Вы обречены, Мы забрали ваши права на приобретение новых садов.</p>
+        <button class="rep-btn-ok" onclick="cls()">Ок.</button>
+    </div>
+
+    <div class="modal" id="ann-error" style="background: white;">
+        <div class="close-x" style="background: #fcc419;" onclick="clsOne('ann-error'); openW('admin-panel');">×</div>
+        <p style="color: black; text-align: center; font-weight: bold; margin-top: 30px; font-size: 20px;">Анонс пустой, введи текст.</p>
+    </div>
+
+    <div class="modal" id="main-m">
+        <div class="close-x" onclick="cls()">×</div>
+        <h2 style="text-align:center; font-size: 30px; margin-bottom: 20px;">Ваша Сеть.</h2>
+        <div style="display:flex; gap:15px; flex-wrap: wrap;">
+            <div style="border:4px solid red; padding:15px; text-align:center; flex:1; border-radius: 15px; min-width: 140px;">
+                <b style="color:black; font-size: 16px;">Приобрести Сад</b><br>
+                <b style="font-size: 18px;">500 монет.</b><div style="font-size:60px;">🌴</div>
+                <button style="background:red; color:white; border:none; width:100%; padding:12px; font-weight:bold; cursor:pointer; font-size: 18px; border-radius: 8px; margin-top:5px;" onclick="startGo('garden')">Го.</button>
+            </div>
+            <div id="antenna-func" style="border:4px solid #33e0ff; padding:15px; text-align:center; flex:1; border-radius: 15px; opacity:0.5; min-width: 140px;">
+                <b style="color:black; font-size: 16px;">XP Антенна</b><br>
+                <b style="font-size: 18px; visibility: hidden;">1600 монет.</b><div style="font-size:60px;">📡</div>
+                <button style="background:#33e0ff; color:black; border:none; width:100%; padding:12px; font-weight:bold; cursor:pointer; font-size: 18px; border-radius: 8px; margin-top:5px;" onclick="tryBuyAntenna()">Го.</button>
+            </div>
+            <div id="secret-deal" style="text-align:center; width:100%; opacity:0.5; margin-top: 15px;">
+                <b id="deal-txt" style="color:red; font-size: 18px;">Закрыто</b><div style="font-size:60px;">?</div>
+                <div style="background:#e066ff; color:white; font-size:14px; padding: 10px; border-radius: 5px;">Щеноричный Сдел.</div>
+                <p style="font-size:12px; font-weight:bold; margin-top:10px; color:#555;">Для разблокировки этой функции, вам требуется достичь 900 уровень.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal admin-modal" id="admin-panel">
+        <div class="close-x" onclick="cls()">×</div>
+        <h2 style="font-size: 24px; color: white; margin-bottom: 5px;">Админ Панель 1.6 🌿 @Xn1ckname</h2>
+        <button class="admin-btn" onclick="cheatMoney()">1) Бесконечные деньги — включить.</button>
+        <button class="admin-btn" onclick="cheatLevel()">2) Бесконечный Уровень — Включить.</button>
+        <div style="border-top: 2px dashed #444; padding-top: 10px;">
+            <b style="color: #00ff00;">3) Announcement — Сообщение:</b>
+            <input type="text" id="ann-input" class="admin-input" placeholder="Введите Анонс...">
+            <button class="confirm-btn" onclick="sendCustomAnnouncement()">ПОДТВЕРДИТЬ</button>
+        </div>
+        <button class="admin-btn" style="margin-top: 20px; border-color: red; color: red;" onclick="toggleGodMode()">⚡️ РЕЖИМ БОГА — КЛИК</button>
+    </div>
+
+    <div class="modal" id="err-m">
+        <div class="close-x" onclick="clsOne('err-m')">×</div>
+        <h2 style="text-align:center; font-size: 30px; color: red; margin-bottom: 20px;">Ошибка.</h2>
+        <p id="err-text" style="text-align:center; font-size: 20px; font-weight: bold; color: #333; line-height: 1.4;">Чтобы разблокировать доступ к этому предмету, в первую очередь вам нужно заработать 1600 монет, и 5 уровень. Приходи по-позже, щегол!</p>
+    </div>
+
+    <div class="modal" id="ant-income-m">
+        <div class="close-x" onclick="clsOne('ant-income-m')">×</div>
+        <div style="background:#fcc419; color:black; padding:20px; text-align:center; margin:-30px -30px 20px -30px; border-radius:30px 30px 0 0; font-size: 24px;">Доход Антенны #<span id="ant-id">0</span></div>
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+            <p style="text-align:center; font-size: 22px; font-weight: bold; margin: 10px 0;">Ваша прибыль: +<span id="ant-val">0</span> XP</p>
+            <button id="ant-up-btn" onclick="upgradeAntenna()" style="background:#ccff00; padding:15px; font-weight:bold; cursor:pointer; border:4px solid black; border-radius:15px; width:100%; font-size:16px;">Улучшить доход на +10 XP — 350 монет.</button>
+            <button id="ant-ex-btn" onclick="exchangeAntenna()" style="background:white; padding:15px; font-weight:bold; cursor:pointer; border:3px solid #ccc; border-radius:15px; width:100%; font-size:16px;">Обмен Монет на 350 XP — 500 монет.</button>
+        </div>
+    </div>
+
+    <div class="modal" id="store-m">
+        <div class="close-x" onclick="cls()">×</div>
+        <div style="background:blue; color:white; padding:20px; text-align:center; margin:-30px -30px 20px -30px; border-radius:30px 30px 0 0; font-size: 24px;">Склад Сада #<span id="garden-id-display">0</span></div>
+        <div id="store-list" style="max-height: 400px; overflow-y: auto;"></div>
+    </div>
+
+    <div class="modal" id="info-m">
+        <div class="close-x" onclick="cls()">×</div>
+        <h3 style="color:black; font-size: 26px; margin-bottom: 15px;">Чё от меня требуется</h3>
+        <p style="color:black; font-size: 18px;">Карочи, тут нада виращивать сад с Трастратравичем и карочи ОН ЛЕТАТЬ УМЕЕ.</p>
+        <p style="font-size:12px; color:gray; margin-top: 30px;">Создатель: Александр Фиримон Русланович.</p>
+    </div>
+
+    <div class="modal" id="tg-modal">
+        <div class="close-x" onclick="cls()">×</div>
+        <p id="tg-text" style="color:black; font-weight:bold; text-align:center; padding-top:20px; font-size: 18px;"></p>
+    </div>
+</div>
+
+<div id="ending"></div>
+
+<script>
+    let money = 900, lvl = 1, xp = 0, isPlacing = null, secretPurchased = false;
+    let gardenCount = 0, antennaCount = 0;
+    let activeGardenIdx = null, activeAntIdx = null;
+    let gardens = [], antennas = [];
+    
+    let unreadReviews = 0, myReviews = [];
+    let isRobberyActive = false, robberyInterval = null, robberyGardenIdx = null;
+    let robberyTimeLeft = 35, robberyTimerInterval = null;
+    let isBanned = false, godMode = false;
+
+    let reviewQueue = [], lastReviewTime = 0, reviewMessageCooldowns = {};
+
+    const itemDefs = [
+        {id:'pom', n:'Помидоры', p:15, r:10, t:12000, e:'🍅', amt:10}, 
+        {id:'ogur', n:'Огурцы', p:5, r:6, t:16000, e:'🥒', amt:10},
+        {id:'arb', n:'Семень Арбуза', p:35, r:25, t:9000, e:'🍉', amt:10}, 
+        {id:'klub', n:'Семень Клубники', p:55, r:85, t:5000, e:'🍓', amt:10},
+        {id:'tyk', n:'Семень Тыквы', p:30, r:22, t:11000, e:'🎃', amt:10},
+        {id:'vin', n:'Виноград', p:150, r:50, t:6000, e:'🍇', amt:5}, 
+        {id:'cher', n:'Дерево Черешни', p:450, r:235, t:3000, e:'🍒', amt:2},
+        {id:'sec', n:'???', p:15500, e:'❓', s:true}
+    ];
+
+    const saladReview = "Хотел я значит сделать салат, но не хотел покупать для него овощи, думал, что опять куплю херню, но тут, моя жизнь превратилась в сказку, я увидел ваш сад! И думаю, а почему бы и не пойти к вам? Аж появилось доверие. Решил я взять пакет и набрать пару огурцов и помидоров. Возращаюсь в свою хатку, и делаю салат, и просто болдею, огурцы и помидоры были как в сказке, однозначно 5 звёзд!";
+
+    const goodReviews = {
+        pom: { text: saladReview, stars: 5 },
+        ogur: { text: saladReview, stars: 5 },
+        vin: { text: "Отличный Виноград! С радостью съел, не фрукт, а мёд! Всем рекомендую.", stars: 5 },
+        arb: { text: "Спасибо! Искал свежий арбуз для детей, и он был ахриненным! Всем рекомендую!", stars: 5 },
+        cher: { text: "Сидела и думала о том, где откопать хорошую черешню, вышла я значит на улицу и вижу ваш сад, и решилась я купить пару черешень у вас, они были ахриненные! Не когда не ела такие, а самое главное, что такие фиг достанешь. Спасибо!", stars: 5 },
+        tyk: { text: "Вообще кайф! Искал тыкву, ведь сегодня Хэллоуин, и нашёл у вас! Получилась прикольная вкусная декорация, Мы потом её съели.", stars: 5 },
+        klub: { text: "Какая сочная клубника! Лучшее, что я пробовал за последнее время.", stars: 5 }
+    };
+
+    const badReviews = [
+        { text: "НУ И БРЕД, КУПИЛА ЗНАЧИТ У ВАС КИЛОГРАММ КЛУБНИКИ, МАЛО ТОГО, ЧТО ОНА ОЧЕНЬ ДОРОГАЯ, ТАК И ЕЩЁ КОГДА МНЕ ЕЁ ВЫДАЛИ В РУКИ, СРАЗУ ЖЕ ВЫХВАТИЛ КАКОЙ-ТО ПАРЕНЬ, НИ ОХРАНЫ, НИЧЕГО! ОСТАЛАСЬ БЕЗ ДЕНЕГ И КЛУБНИКИ, СПАСИБО!", stars: 1 },
+        { text: "Ну и что это значит? Хожу я значит по саду, чтобы выбрать себе фрукт, и вижу, как толпа подростков нагло срывают арбузы с огорода и убегают. Есть у вас вообще внимательность?", stars: 2 },
+        { text: "Я конечно всё понимаю, но думаю, вам нужно больше внимательности.", stars: 2 },
+        { text: "Ну спасибо, вместо того, чтобы нормально следить за садом, вы пускаете левых гопников. Взял я одну тыкву, и три подростка выхватили её у меня, причём настолько быстро, что даже моргнуть не успел, и на моих глазах один из них пнул мою тыкву ногой, а затем запинали её, я решил податься и уйти. Больше не прийду к вам.", stars: 1 }
+    ];
+
+    window.addEventListener('storage', (e) => { if (e.key === 'global_announcement') showAnnouncementUI(e.newValue); });
+
+    function showAnnouncementUI(text) {
+        const box = document.getElementById('global-announcement');
+        const p = document.getElementById('announcement-text');
+        p.innerText = text;
+        box.style.display = 'block';
+        setTimeout(() => box.classList.add('show'), 50);
+        setTimeout(() => { box.classList.remove('show'); setTimeout(() => { box.style.display = 'none'; }, 500); }, 12000);
+    }
+
+    function sendCustomAnnouncement() {
+        let input = document.getElementById('ann-input');
+        let text = input.value.trim();
+        if (text === "") { clsOne('admin-panel'); openW('ann-error'); } 
+        else { localStorage.setItem('global_announcement', text + ' ' + Date.now()); showAnnouncementUI(text); input.value = ""; cls(); }
+    }
+
+    let pT;
+    const mB = document.getElementById('menu-trigger-btn');
+    mB.addEventListener('mousedown', () => { pT = window.setTimeout(() => { document.getElementById('admin-cube').style.display = 'flex'; showPop("АКТИВАЦИЯ МОМО", "#00ff00"); }, 24000); });
+    mB.addEventListener('touchstart', (e) => { pT = window.setTimeout(() => { document.getElementById('admin-cube').style.display = 'flex'; showPop("АКТИВАЦИЯ МОМО", "#00ff00"); }, 24000); });
+    mB.addEventListener('mouseup', () => { clearTimeout(pT); });
+    mB.addEventListener('touchend', () => { clearTimeout(pT); });
+
+    const triggerBtn = document.getElementById('trigger-btn');
+    triggerBtn.addEventListener('click', () => { openW('info-m'); });
+
+    const cube = document.getElementById('admin-cube');
+    let isDragging = false, offsetX, offsetY;
+    cube.addEventListener('mousedown', (e) => { if (e.target === cube) { isDragging = true; offsetX = e.clientX - cube.offsetLeft; offsetY = e.clientY - cube.offsetTop; } });
+    cube.addEventListener('touchstart', (e) => { isDragging = true; const touch = e.touches[0]; offsetX = touch.clientX - cube.offsetLeft; offsetY = touch.clientY - cube.offsetTop; });
+    document.addEventListener('mousemove', (e) => { if (isDragging) { cube.style.left = (e.clientX - offsetX) + 'px'; cube.style.top = (e.clientY - offsetY) + 'px'; cube.style.right = 'auto'; } });
+    document.addEventListener('touchmove', (e) => { if (isDragging) { const touch = e.touches[0]; cube.style.left = (touch.clientX - offsetX) + 'px'; cube.style.top = (touch.clientY - offsetY) + 'px'; cube.style.right = 'auto'; } });
+    document.addEventListener('mouseup', () => { isDragging = false; });
+    document.addEventListener('touchend', () => { isDragging = false; });
+    cube.addEventListener('click', () => { if(!isDragging) openW('admin-panel'); });
+
+    function cheatMoney() { money = 9999999999; update(); showPop("ЧИТ: ДЕНЬГИ", "#00ff00"); }
+    function cheatLevel() { lvl = 99999999; update(); showPop("ЧИТ: УРОВЕНЬ", "#33e0ff"); }
+
+    function toggleGodMode() {
+        godMode = !godMode;
+        let txt = godMode ? "РЕЖИМ БОГА ВКЛЮЧЕН" : "РЕЖИМ БОГА ОТКЛЮЧЁН";
+        showPop(txt, "red");
+        if(godMode) {
+            myReviews = myReviews.filter(r => r.stars > 2);
+            unreadReviews = 0;
+            update();
+        }
+    }
+
+    function update() {
+        document.getElementById('m-val').innerText = Math.floor(money);
+        document.getElementById('l-val').innerText = lvl;
+        let target = lvl * 100;
+        document.getElementById('xp-fill').style.width = (xp / target * 100) + "%";
+        document.getElementById('xp-text').innerText = Math.floor(xp) + " / " + target + " XP";
+        
+        const badge = document.getElementById('review-badge');
+        if(unreadReviews > 0) { badge.innerText = unreadReviews; badge.style.display = 'flex'; } 
+        else { badge.style.display = 'none'; }
+
+        if(gardenCount > 0) document.getElementById('garden-hint-text').style.display = 'block';
+        if(lvl >= 5) document.getElementById('antenna-func').style.opacity = "1";
+        if (lvl >= 900) {
+            let d = document.getElementById('secret-deal'); d.style.opacity = "1";
+            document.getElementById('deal-txt').innerText = "ОТКРЫТО"; document.getElementById('deal-txt').style.color = "green";
+            d.onclick = startEnd; d.style.cursor = "pointer";
+        }
+        if (activeGardenIdx !== null) {
+            document.getElementById('garden-id-display').innerText = activeGardenIdx + 1;
+            const list = document.getElementById('store-list'); list.innerHTML = '';
+            itemDefs.forEach(i => {
+                let stock = i.s ? '' : `<div style="font-size:14px;color:#444;font-weight:bold;">Штук: ${gardens[activeGardenIdx][i.id] || 0}</div>`;
+                list.innerHTML += `<div style="padding:15px 0; border-bottom:2px solid #eee; display:flex; justify-content:space-between; align-items:center;">
+                    <div><b style="font-size:18px;">${i.e} ${i.n} — ${i.p} монет.</b>${stock}</div>
+                    <button style="background:#ccff00; padding:10px 15px; font-weight:bold; cursor:pointer; border:2px solid black; border-radius:8px; font-size:16px;" onclick="buy('${i.id}')">Купить</button>
+                </div>`;
+            });
+        }
+    }
+
+    function addXP(amt) { xp += amt; while(xp >= lvl * 100) { xp -= lvl * 100; lvl++; } update(); }
+    
+    function showPop(t, c, x, y) {
+        const p = document.createElement('div'); p.className = 'popup'; p.innerText = t; p.style.color = c;
+        p.style.left = (x || window.innerWidth/2) + "px"; p.style.top = (y || window.innerHeight/2) + "px"; 
+        document.body.appendChild(p); setTimeout(() => p.remove(), 1000);
+    }
+
+    function handleReviewsClick() {
+        if(gardenCount === 0) { openW('review-no-garden'); } 
+        else {
+            if(myReviews.length === 0) { openW('review-empty-garden'); } 
+            else { renderReviews(); openW('review-list-modal'); unreadReviews = 0; update(); }
+        }
+    }
+
+    function renderReviews() {
+        const container = document.getElementById('reviews-container');
+        if(!container) return;
+        container.innerHTML = '';
+        myReviews.slice().reverse().forEach(rev => {
+            container.innerHTML += `<div class="review-item">
+                <div style="color:#fcc419; font-size:20px;">${'★'.repeat(rev.stars)}${'☆'.repeat(5-rev.stars)}</div>
+                <p style="margin:5px 0; font-size:16px; font-weight:bold;">${rev.text}</p>
+                <div style="color:gray; font-size:13px; font-family:Arial;">Отзыв про #${rev.gardenNum} огород</div>
+            </div>`;
+        });
+    }
+
+    setInterval(() => {
+        let now = Date.now();
+        if (reviewQueue.length > 0 && now - lastReviewTime >= 7000) {
+            let rev = reviewQueue.shift();
+            myReviews.push(rev);
+            lastReviewTime = now;
+            // ПОФИКШЕНО: Если окно открыто, сразу обновляем список, чтобы не пришлось перезаходить
+            if (document.getElementById('review-list-modal').style.display === 'block') { 
+                renderReviews(); 
+                unreadReviews = 0; 
+            } else { 
+                unreadReviews++; 
+            }
+            update();
+        }
+    }, 1000);
+
+    function tryAddReview(rev, gNum) {
+        if(godMode && rev.stars <= 2) return;
+        let now = Date.now();
+        if (reviewMessageCooldowns[rev.text] && (now - reviewMessageCooldowns[rev.text] < 30000)) return;
+        if (Math.random() < 0.25) {
+            reviewMessageCooldowns[rev.text] = now;
+            let finalRev = {...rev, gardenNum: gNum};
+            reviewQueue.push(finalRev);
+        }
+    }
+
+    function buy(id) {
+        let itm = itemDefs.find(x => x.id === id);
+        if (itm.s && secretPurchased) return;
+        if (money < itm.p) return;
+        if (itm.s) {
+            money -= itm.p; secretPurchased = true;
+            document.getElementById('tg-text').innerText = "Ты разблокировал доступ к ТГ каналу! Вбей в поиск «Grow A Garden With Trastratravich» Теперь ты сможешь следить за обновлениями игры. Да, это всё .-.";
+            openW('tg-modal');
+        } else {
+            money -= itm.p;
+            gardens[activeGardenIdx][id] = (gardens[activeGardenIdx][id] || 0) + itm.amt;
+            if (Math.random() < 0.4) { addXP(30); showPop("+30 XP", "#a333c8"); }
+        }
+        update();
+    }
+
+    function upgradeAntenna() {
+        if (activeAntIdx !== null && money >= 350) {
+            money -= 350; antennas[activeAntIdx].income += 10;
+            document.getElementById('ant-val').innerText = antennas[activeAntIdx].income;
+            showPop("УЛУЧШЕНО!", "green"); update();
+        }
+    }
+
+    function exchangeAntenna() { if (money >= 500) { money -= 500; addXP(350); showPop("+350 XP", "#33e0ff"); update(); } }
+    
+    function tryBuyAntenna() { 
+        if(lvl < 5 || money < 1600) { 
+            document.getElementById('err-text').innerText = "Чтобы разблокировать доступ к этому предмету, в первую очередь вам нужно заработать 1600 монет, и 5 уровень. Приходи по-позже, щегол!";
+            openW('err-m'); 
+        } else { cls(); isPlacing = 'antenna'; document.getElementById('placement-hint').innerText = "Выберите своё местоположение, чтобы посадить антенну."; document.getElementById('placement-hint').style.display = 'block'; update(); } 
+    }
+    
+    function startGo(type) { 
+        if(isBanned) {
+            document.getElementById('err-text').innerText = "Извините, как так ваша репутация упала, нам пришлось забрать ваши права на приобретение новых садов. Вы больше не сможете владеть не единым садом.";
+            openW('err-m'); return;
+        }
+        if(money >= 500) { cls(); isPlacing = type || 'garden'; document.getElementById('placement-hint').innerText = "Выберите своё местоположение, чтобы начать выращивать сад."; document.getElementById('placement-hint').style.display='block'; } 
+    }
+    
+    function openW(id) { document.getElementById(id).style.display = 'block'; }
+    function cls() { document.querySelectorAll('.modal').forEach(m => m.style.display='none'); activeGardenIdx = null; activeAntIdx = null; }
+    function clsOne(id) { document.getElementById(id).style.display = 'none'; }
+
+    function startEnd() {
+        cls(); const screen = document.getElementById('game-screen'); const end = document.getElementById('ending');
+        screen.style.transition = 'opacity 5s'; screen.style.opacity = '0';
+        setTimeout(() => {
+            end.style.display = 'flex';
+            setTimeout(() => { end.style.opacity = '1'; }, 100);
+            let lines = ["Ого...", "Ты...", "Ты как это сделал?!", "Эм...", "Подожди, я без шуток.", "Я честно удивлён сильно, без шуток.", "...", "И ты действительно потратил столько часов на эту игру, и чтобы достигнуть своей цели...?", "У меня плохие новости, разуж ты сюда попал, дай расскажу.", "Это конец игры, я без шуток, за это не выдают награду, ты достиг своей цели и попал в тупик...", "THE END."];
+            let i = 0;
+            function showNext() { if (i < lines.length) { end.innerText = lines[i++]; setTimeout(showNext, 5000); } }
+            showNext();
+        }, 5000);
+    }
+
+    function startRobbery() {
+        if (gardenCount === 0 || isRobberyActive || godMode) return;
+        let potentialGardens = [];
+        gardens.forEach((g, idx) => {
+            let total = 0; Object.keys(g).forEach(k => { if(k !== 'id') total += g[k]; });
+            if(total > 0) potentialGardens.push(idx);
+        });
+        if(potentialGardens.length === 0) return;
+        robberyGardenIdx = potentialGardens[Math.floor(Math.random() * potentialGardens.length)];
+        isRobberyActive = true; robberyTimeLeft = 35;
+        document.getElementById('robbery-timer').innerText = robberyTimeLeft;
+        const alertBox = document.getElementById('robbery-alert');
+        const msg = document.getElementById('robbery-msg');
+        msg.innerText = `ПАРНИ КРАДУТ ВАШИ ФРУКТЫ, ОСТАНОВИТЕ ИХ (ПРОИСХОДЯЩЕЕ В #${robberyGardenIdx + 1} ОГОРОДЕ)`;
+        alertBox.style.display = 'block';
+        setTimeout(() => { alertBox.style.top = '20px'; }, 50);
+        
+        robberyTimerInterval = setInterval(() => {
+            robberyTimeLeft--;
+            document.getElementById('robbery-timer').innerText = robberyTimeLeft;
+            if(robberyTimeLeft <= 0) {
+                clearInterval(robberyTimerInterval);
+                // НОВАЯ ОБНОВА: Окно плавно улетает вверх
+                const alertBox = document.getElementById('robbery-alert');
+                alertBox.style.transition = "top 1s ease-in";
+                alertBox.style.top = "-1000px";
+                setTimeout(() => {
+                    alertBox.style.display = 'none';
+                    alertBox.style.transition = "top 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)"; // возвращаем как было
+                    stopRobbery(true);
+                    openW('rep-dead-m'); // Показываем окно смерти репутации
+                    finishGame();
+                }, 1000);
+            }
+        }, 1000);
+
+        robberyInterval = setInterval(() => {
+            let possibleItems = Object.keys(gardens[robberyGardenIdx]).filter(k => gardens[robberyGardenIdx][k] > 0);
+            if(possibleItems.length > 0) {
+                let randomItem = possibleItems[Math.floor(Math.random() * possibleItems.length)];
+                gardens[robberyGardenIdx][randomItem]--;
+                showPop("-1 Овощь/Фрукт", "red");
+                tryAddReview(badReviews[Math.floor(Math.random() * badReviews.length)], robberyGardenIdx + 1);
+                update();
+            } else { stopRobbery(); }
+        }, 1165);
+    }
+
+    function stopRobbery(isAuto = false) {
+        if(!isAuto) {
+            isRobberyActive = false;
+            clearInterval(robberyInterval); clearInterval(robberyTimerInterval);
+            const alertBox = document.getElementById('robbery-alert');
+            alertBox.style.top = '-400px';
+            setTimeout(() => { alertBox.style.display = 'none'; }, 500);
+            showPop("ОТБИТО!", "#82c91e");
+        } else {
+            // Если авто (провал), просто чистим интервалы, само окно улетает в коде выше
+            isRobberyActive = false;
+            clearInterval(robberyInterval); clearInterval(robberyTimerInterval);
+        }
+        robberyGardenIdx = null; update();
+    }
+
+    function finishGame() {
+        isBanned = true;
+        gardens = []; gardenCount = 0;
+        document.querySelectorAll('.garden-plot').forEach(el => el.remove());
+        showPop("РЕПУТАЦИЯ 0", "red");
+        update();
+    }
+
+    setInterval(() => { if(Math.random() < 0.15) startRobbery(); }, 25000);
+
+    document.getElementById('game-screen').onclick = (e) => {
+        if (isPlacing && e.target.id === 'game-screen') {
+            if(isPlacing === 'garden') {
+                const currentIdx = gardenCount;
+                const g = document.createElement('div'); g.className = 'garden-plot';
+                g.style.left = e.clientX + 'px'; g.style.top = e.clientY + 'px';
+                g.innerHTML = '<span style="font-size:70px; filter:grayscale(1) brightness(0);">🌿</span>';
+                gardens[currentIdx] = { pom:0, ogur:0, arb:0, klub:0, vin:0, cher:0, tyk:0 };
+                itemDefs.forEach(itm => { 
+                    if(!itm.s) { 
+                        setInterval(() => { 
+                            if (gardens[currentIdx][itm.id] > 0) { 
+                                gardens[currentIdx][itm.id]--; 
+                                money += itm.r; 
+                                showPop("+" + itm.r + " монет", "black", e.clientX, e.clientY); 
+                                if(!isRobberyActive || robberyGardenIdx !== currentIdx) {
+                                    if(goodReviews[itm.id]) tryAddReview(goodReviews[itm.id], currentIdx + 1);
+                                }
+                                update(); 
+                            } 
+                        }, itm.t); 
+                    } 
+                });
+                g.onclick = (ev) => { ev.stopPropagation(); activeGardenIdx = currentIdx; openW('store-m'); update(); };
+                document.getElementById('game-screen').appendChild(g);
+                money -= 500; gardenCount++; isPlacing = null;
+            } else if(isPlacing === 'antenna') {
+                const antIdx = antennaCount;
+                const a = document.createElement('div'); a.className = 'antenna-plot';
+                a.style.left = e.clientX + 'px'; a.style.top = e.clientY + 'px';
+                a.innerHTML = '<span style="font-size:70px;">📡</span>';
+                antennas[antIdx] = { income: 10 };
+                setInterval(() => { addXP(antennas[antIdx].income); showPop("+" + antennas[antIdx].income + " XP", "#33e0ff", e.clientX, e.clientY); }, 1000);
+                a.onclick = (ev) => { ev.stopPropagation(); activeAntIdx = antIdx; document.getElementById('ant-id').innerText = antIdx + 1; document.getElementById('ant-val').innerText = antennas[antIdx].income; openW('ant-income-m'); };
+                document.getElementById('game-screen').appendChild(a);
+                money -= 1600; antennaCount++; isPlacing = null;
+            }
+            document.getElementById('placement-hint').style.display = 'none'; update();
+        }
+    };
+
+    function triggerAntiCheat() { document.getElementById('anti-cheat-screen').style.display = 'flex'; setTimeout(() => { location.reload(); }, 3000); }
+
+    setInterval(() => {
+        if (document.body.innerText.includes("ДЕНЬГИ МАХ") || document.body.innerText.includes("МАХ")) triggerAntiCheat();
+        let imgs = document.getElementsByTagName('img');
+        for (let i = 0; i < imgs.length; i++) { if (imgs[i].src && !imgs[i].src.includes('garden')) triggerAntiCheat(); }
+        let divs = document.getElementsByTagName('div');
+        for (let i = 0; i < divs.length; i++) { if (divs[i].style.zIndex > 6000) triggerAntiCheat(); }
+    }, 2000);
+
+    update();
+</script>
+</body>
+</html>
