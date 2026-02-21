@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Grow a Garden with Trastratravich: @Xn1ckname EDITION 1.6</title>
+    <title>Grow a Garden with Trastratravich: @Xn1ckname EDITION 1.8 🐢</title>
     <style>
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: 'Arial Black', sans-serif; user-select: none; }
         #game-screen { width: 100vw; height: 100vh; background-color: #82c91e; position: relative; transition: opacity 2s; }
@@ -61,6 +61,13 @@
         #robbery-timer { font-size: 30px; color: #ff4d4d; font-weight: bold; display: block; margin-top: 10px; }
         .rep-dead-modal { text-align: center; border: 6px solid #ccc !important; }
         .rep-btn-ok { background: #82c91e; color: white; border: none; padding: 15px 50px; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 20px; font-size: 20px; }
+
+        /* Мутационные стили */
+        .turtle-btn { border: 4px solid #82c91e !important; background: white !important; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+        .turtle-btn.locked { filter: grayscale(1); opacity: 0.6; cursor: not-allowed; }
+        .mutation-row { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee; }
+        .mut-btn { background: #82c91e; color: white; border: none; padding: 8px 15px; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        .mut-btn:disabled { background: #ccc; cursor: not-allowed; }
     </style>
 </head>
 <body>
@@ -92,7 +99,7 @@
         <button class="robbery-btn" onclick="stopRobbery()">Вызвать подгон</button>
     </div>
 
-    <div id="admin-cube">Админ Панель 1.6 🌿 @Xn1ckname</div>
+    <div id="admin-cube">Админ Панель 1.8 🐢🌿 @Xn1ckname</div>
 
     <div id="global-announcement">
         <div class="owner-tag">@Xn1ckname [Owner]</div>
@@ -161,6 +168,11 @@
                 <b style="font-size: 18px; visibility: hidden;">1600 монет.</b><div style="font-size:60px;">📡</div>
                 <button style="background:#33e0ff; color:black; border:none; width:100%; padding:12px; font-weight:bold; cursor:pointer; font-size: 18px; border-radius: 8px; margin-top:5px;" onclick="tryBuyAntenna()">Го.</button>
             </div>
+            <div id="turtle-deal" class="turtle-btn" style="padding:15px; text-align:center; flex:1; border-radius: 15px; min-width: 140px;">
+                <b style="color:black; font-size: 12px; position:absolute; top:5px;">Оболон Черепахи</b>
+                <div style="font-size:50px; margin-top:10px;">🐢🦠</div>
+                <button id="turtle-go-btn" style="background:#82c91e; color:white; border:none; width:100%; padding:8px; font-weight:bold; cursor:pointer; font-size: 16px; border-radius: 8px; margin-top:5px;" onclick="handleTurtleClick()">Го.</button>
+            </div>
             <div id="secret-deal" style="text-align:center; width:100%; opacity:0.5; margin-top: 15px;">
                 <b id="deal-txt" style="color:red; font-size: 18px;">Закрыто</b><div style="font-size:60px;">?</div>
                 <div style="background:#e066ff; color:white; font-size:14px; padding: 10px; border-radius: 5px;">Щеноричный Сдел.</div>
@@ -169,9 +181,44 @@
         </div>
     </div>
 
+    <div class="modal" id="err-lvl-20">
+        <div class="close-x" style="background:#fcc419;" onclick="clsOne('err-lvl-20')">×</div>
+        <h2 style="text-align:center; font-size: 30px; color: red; margin-bottom: 20px;">Ошибка.</h2>
+        <p style="text-align:center; font-size: 20px; font-weight: bold; color: black;">У тебя плохие условия сейчас. Тебе нужно дойти до 20 уровня, а потом уже возвращаться.</p>
+    </div>
+
+    <div class="modal" id="turtle-hire-m">
+        <div class="close-x" style="background:#fcc419;" onclick="clsOne('turtle-hire-m')">×</div>
+        <div style="background:white; border:4px solid #82c91e; padding:15px; margin:-30px -30px 20px -30px; border-radius:30px 30px 0 0; text-align:center;">
+            <span style="color:#82c91e; font-size:24px;">Черепаха в сделке, готов её нанять за 3000 монет?</span>
+        </div>
+        <button style="background:#82c91e; color:white; border:none; width:100%; padding:20px; font-size:24px; font-weight:bold; border-radius:15px; cursor:pointer;" onclick="confirmHireTurtle()">Подтверждаю.</button>
+    </div>
+
+    <div class="modal" id="turtle-poor-m">
+        <div class="close-x" style="background:#fcc419;" onclick="clsOne('turtle-poor-m')">×</div>
+        <p style="text-align:center; font-size: 22px; font-weight: bold; color: black; padding: 20px;">Черепаха в отчаянии, она не принимает твои условия.</p>
+    </div>
+
+    <div class="modal" id="mutation-m" style="width: 550px;">
+        <div class="close-x" onclick="cls()">×</div>
+        <div style="background:#82c91e; color:black; padding:20px; text-align:center; margin:-30px -30px 20px -30px; border-radius:30px 30px 0 0; font-size: 24px;">Мутировать Фрукты/Овощи</div>
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+            <span style="font-size:50px;">🐢</span>
+            <p style="font-size:14px; color:black; font-weight:bold;">— Могу чём-то помочь? Могу улучшить ваш доход в 4 раза! Выбери определенный фрукт в твоём инвентаре, чтобы его замутировать.</p>
+        </div>
+        <p style="font-size:12px; color:gray; margin-bottom:10px;">Чем помогают мутации: Улучшает вашу прибыль фрукта в 4 раза больше. Учти, что это работает только один раз, если ваш мутированый фрукт/овощь, уже приобрёли, мутация не сохраниться на следующий фрукт/овощь.</p>
+        <div id="mutation-list" style="max-height:350px; overflow-y:auto; border:2px solid #eee; border-radius:10px; padding:10px;"></div>
+    </div>
+
+    <div class="modal" id="mut-success-m">
+        <div class="close-x" style="background:#fcc419;" onclick="clsOne('mut-success-m')">×</div>
+        <p style="text-align:center; font-size: 22px; font-weight: bold; color: #82c91e; padding: 20px;" id="mut-success-text"></p>
+    </div>
+
     <div class="modal admin-modal" id="admin-panel">
         <div class="close-x" onclick="cls()">×</div>
-        <h2 style="font-size: 24px; color: white; margin-bottom: 5px;">Админ Панель 1.6 🌿 @Xn1ckname</h2>
+        <h2 style="font-size: 24px; color: white; margin-bottom: 5px;">Админ Панель 1.8 🐢🌿 @Xn1ckname</h2>
         <button class="admin-btn" onclick="cheatMoney()">1) Бесконечные деньги — включить.</button>
         <button class="admin-btn" onclick="cheatLevel()">2) Бесконечный Уровень — Включить.</button>
         <div style="border-top: 2px dashed #444; padding-top: 10px;">
@@ -179,6 +226,7 @@
             <input type="text" id="ann-input" class="admin-input" placeholder="Введите Анонс...">
             <button class="confirm-btn" onclick="sendCustomAnnouncement()">ПОДТВЕРДИТЬ</button>
         </div>
+        <button class="admin-btn" style="margin-top:10px;" onclick="toggleAllMutations()">Замутировать Все Фрукты/Овощи 🦠</button>
         <button class="admin-btn" style="margin-top: 20px; border-color: red; color: red;" onclick="toggleGodMode()">⚡️ РЕЖИМ БОГА — КЛИК</button>
     </div>
 
@@ -229,17 +277,18 @@
     let isRobberyActive = false, robberyInterval = null, robberyGardenIdx = null;
     let robberyTimeLeft = 35, robberyTimerInterval = null;
     let isBanned = false, godMode = false;
+    let adminMutationMode = false;
 
     let reviewQueue = [], lastReviewTime = 0, reviewMessageCooldowns = {};
 
     const itemDefs = [
-        {id:'pom', n:'Помидоры', p:15, r:10, t:12000, e:'🍅', amt:10}, 
-        {id:'ogur', n:'Огурцы', p:5, r:6, t:16000, e:'🥒', amt:10},
-        {id:'arb', n:'Семень Арбуза', p:35, r:25, t:9000, e:'🍉', amt:10}, 
-        {id:'klub', n:'Семень Клубники', p:55, r:85, t:5000, e:'🍓', amt:10},
-        {id:'tyk', n:'Семень Тыквы', p:30, r:22, t:11000, e:'🎃', amt:10},
-        {id:'vin', n:'Виноград', p:150, r:50, t:6000, e:'🍇', amt:5}, 
-        {id:'cher', n:'Дерево Черешни', p:450, r:235, t:3000, e:'🍒', amt:2},
+        {id:'pom', n:'Помидоры', p:15, r:10, t:12000, e:'🍅', amt:10, mutR: 225}, 
+        {id:'ogur', n:'Огурцы', p:5, r:6, t:16000, e:'🥒', amt:10, mutR: 125},
+        {id:'arb', n:'Семень Арбуза', p:35, r:25, t:9000, e:'🍉', amt:10, mutR: 355}, 
+        {id:'klub', n:'Семень Клубники', p:55, r:85, t:5000, e:'🍓', amt:10, mutR: 478},
+        {id:'tyk', n:'Семень Тыквы', p:30, r:22, t:11000, e:'🎃', amt:10, mutR: 255},
+        {id:'vin', n:'Виноград', p:150, r:50, t:6000, e:'🍇', amt:5, mutR: 744}, 
+        {id:'cher', n:'Дерево Черешни', p:450, r:235, t:3000, e:'🍒', amt:2, mutR: 1028},
         {id:'sec', n:'???', p:15500, e:'❓', s:true}
     ];
 
@@ -314,6 +363,69 @@
         }
     }
 
+    function toggleAllMutations() {
+        adminMutationMode = !adminMutationMode;
+        let txt = adminMutationMode ? "МУТАЦИИ: ВСЕГДА ВКЛ." : "МУТАЦИИ: ВЫКЛ.";
+        showPop(txt, "#00ff00");
+    }
+
+    function handleTurtleClick() {
+        if(lvl < 20) {
+            openW('err-lvl-20');
+        } else {
+            openW('turtle-hire-m');
+        }
+    }
+
+    function confirmHireTurtle() {
+        if(money < 3000) {
+            clsOne('turtle-hire-m');
+            openW('turtle-poor-m');
+        } else {
+            money -= 3000;
+            clsOne('turtle-hire-m');
+            openMutationWindow();
+            update();
+        }
+    }
+
+    function openMutationWindow() {
+        const list = document.getElementById('mutation-list');
+        list.innerHTML = '';
+        
+        if(gardens.length === 0) {
+            list.innerHTML = '<p style="text-align:center; color:gray; font-weight:bold; padding:20px;">Посадите свои первые фрукты/овощи, чтобы выдать им определенную мутацию.</p>';
+        } else {
+            gardens.forEach((g, idx) => {
+                let gardenBlock = `<div style="margin-bottom:20px;"><b style="font-size:18px;">Сад #${idx + 1}</b><div style="margin-top:5px;">`;
+                let hasFruits = false;
+                itemDefs.forEach(itm => {
+                    if(!itm.s && g[itm.id] > 0) {
+                        hasFruits = true;
+                        gardenBlock += `
+                            <div class="mutation-row">
+                                <span>${itm.e} ${itm.n}</span>
+                                <button class="mut-btn" onclick="applyMutation(${idx}, '${itm.id}')">Замутировать</button>
+                            </div>`;
+                    }
+                });
+                if(!hasFruits) gardenBlock += '<p style="font-size:12px; color:gray; padding-left:10px;">В этом саду пусто...</p>';
+                gardenBlock += `</div></div>`;
+                list.innerHTML += gardenBlock;
+            });
+        }
+        openW('mutation-m');
+    }
+
+    function applyMutation(gIdx, itemId) {
+        if(!gardens[gIdx].mutations) gardens[gIdx].mutations = {};
+        gardens[gIdx].mutations[itemId] = true;
+        clsOne('mutation-m');
+        let itemName = itemDefs.find(x => x.id === itemId).n;
+        document.getElementById('mut-success-text').innerText = `Отлично! Вы успешно приобрёли мутацию на "${itemName}"`;
+        openW('mut-success-m');
+    }
+
     function update() {
         document.getElementById('m-val').innerText = Math.floor(money);
         document.getElementById('l-val').innerText = lvl;
@@ -327,6 +439,11 @@
 
         if(gardenCount > 0) document.getElementById('garden-hint-text').style.display = 'block';
         if(lvl >= 5) document.getElementById('antenna-func').style.opacity = "1";
+        
+        // Визуальное состояние кнопки черепахи
+        const tBtn = document.getElementById('turtle-deal');
+        if(lvl < 20) tBtn.classList.add('locked'); else tBtn.classList.remove('locked');
+
         if (lvl >= 900) {
             let d = document.getElementById('secret-deal'); d.style.opacity = "1";
             document.getElementById('deal-txt').innerText = "ОТКРЫТО"; document.getElementById('deal-txt').style.color = "green";
@@ -380,13 +497,7 @@
             let rev = reviewQueue.shift();
             myReviews.push(rev);
             lastReviewTime = now;
-            // ПОФИКШЕНО: Если окно открыто, сразу обновляем список, чтобы не пришлось перезаходить
-            if (document.getElementById('review-list-modal').style.display === 'block') { 
-                renderReviews(); 
-                unreadReviews = 0; 
-            } else { 
-                unreadReviews++; 
-            }
+            if (document.getElementById('review-list-modal').style.display === 'block') { renderReviews(); unreadReviews = 0; } else { unreadReviews++; }
             update();
         }
     }, 1000);
@@ -464,7 +575,7 @@
         if (gardenCount === 0 || isRobberyActive || godMode) return;
         let potentialGardens = [];
         gardens.forEach((g, idx) => {
-            let total = 0; Object.keys(g).forEach(k => { if(k !== 'id') total += g[k]; });
+            let total = 0; Object.keys(g).forEach(k => { if(k !== 'id' && k !== 'mutations') total += g[k]; });
             if(total > 0) potentialGardens.push(idx);
         });
         if(potentialGardens.length === 0) return;
@@ -482,22 +593,21 @@
             document.getElementById('robbery-timer').innerText = robberyTimeLeft;
             if(robberyTimeLeft <= 0) {
                 clearInterval(robberyTimerInterval);
-                // НОВАЯ ОБНОВА: Окно плавно улетает вверх
                 const alertBox = document.getElementById('robbery-alert');
                 alertBox.style.transition = "top 1s ease-in";
                 alertBox.style.top = "-1000px";
                 setTimeout(() => {
                     alertBox.style.display = 'none';
-                    alertBox.style.transition = "top 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)"; // возвращаем как было
+                    alertBox.style.transition = "top 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
                     stopRobbery(true);
-                    openW('rep-dead-m'); // Показываем окно смерти репутации
+                    openW('rep-dead-m');
                     finishGame();
                 }, 1000);
             }
         }, 1000);
 
         robberyInterval = setInterval(() => {
-            let possibleItems = Object.keys(gardens[robberyGardenIdx]).filter(k => gardens[robberyGardenIdx][k] > 0);
+            let possibleItems = Object.keys(gardens[robberyGardenIdx]).filter(k => k !== 'id' && k !== 'mutations' && gardens[robberyGardenIdx][k] > 0);
             if(possibleItems.length > 0) {
                 let randomItem = possibleItems[Math.floor(Math.random() * possibleItems.length)];
                 gardens[robberyGardenIdx][randomItem]--;
@@ -517,7 +627,6 @@
             setTimeout(() => { alertBox.style.display = 'none'; }, 500);
             showPop("ОТБИТО!", "#82c91e");
         } else {
-            // Если авто (провал), просто чистим интервалы, само окно улетает в коде выше
             isRobberyActive = false;
             clearInterval(robberyInterval); clearInterval(robberyTimerInterval);
         }
@@ -541,14 +650,23 @@
                 const g = document.createElement('div'); g.className = 'garden-plot';
                 g.style.left = e.clientX + 'px'; g.style.top = e.clientY + 'px';
                 g.innerHTML = '<span style="font-size:70px; filter:grayscale(1) brightness(0);">🌿</span>';
-                gardens[currentIdx] = { pom:0, ogur:0, arb:0, klub:0, vin:0, cher:0, tyk:0 };
+                gardens[currentIdx] = { pom:0, ogur:0, arb:0, klub:0, vin:0, cher:0, tyk:0, mutations: {} };
                 itemDefs.forEach(itm => { 
                     if(!itm.s) { 
                         setInterval(() => { 
                             if (gardens[currentIdx][itm.id] > 0) { 
                                 gardens[currentIdx][itm.id]--; 
-                                money += itm.r; 
-                                showPop("+" + itm.r + " монет", "black", e.clientX, e.clientY); 
+                                
+                                let income = itm.r;
+                                // ЛОГИКА МУТАЦИИ
+                                if(adminMutationMode || (gardens[currentIdx].mutations && gardens[currentIdx].mutations[itm.id])) {
+                                    income = itm.mutR;
+                                    if(!adminMutationMode) gardens[currentIdx].mutations[itm.id] = false; // Одноразовая
+                                    showPop("МУТАЦИЯ! x4", "#82c91e", e.clientX, e.clientY - 40);
+                                }
+
+                                money += income; 
+                                showPop("+" + income + " монет", "black", e.clientX, e.clientY); 
                                 if(!isRobberyActive || robberyGardenIdx !== currentIdx) {
                                     if(goodReviews[itm.id]) tryAddReview(goodReviews[itm.id], currentIdx + 1);
                                 }
