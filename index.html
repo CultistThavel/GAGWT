@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Grow a Garden with Trastratravich: @Xn1ckname EDITION 1.8 🐢</title>
+    <title>Grow a Garden with Trastratravich: @Xn1ckname EDITION 2.0 🌶</title>
     <style>
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: 'Arial Black', sans-serif; user-select: none; }
         #game-screen { width: 100vw; height: 100vh; background-color: #82c91e; position: relative; transition: opacity 2s; }
@@ -62,18 +62,63 @@
         .rep-dead-modal { text-align: center; border: 6px solid #ccc !important; }
         .rep-btn-ok { background: #82c91e; color: white; border: none; padding: 15px 50px; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 20px; font-size: 20px; }
 
-        /* Мутационные стили */
         .turtle-btn { border: 4px solid #82c91e !important; background: white !important; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
         .turtle-btn.locked { filter: grayscale(1); opacity: 0.6; cursor: not-allowed; }
         .mutation-row { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee; }
         .mut-btn { background: #82c91e; color: white; border: none; padding: 8px 15px; border-radius: 10px; cursor: pointer; font-weight: bold; }
         .mut-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+        /* ВЕРСИЯ 2.0: БОСС ФАЙТ */
+        #boss-battle-screen { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: black; z-index: 15000; overflow: hidden; }
+        #boss-img { position: absolute; left: 50%; top: 30%; transform: translate(-50%, -50%); width: 300px; height: 300px; border: 5px solid white; animation: bossBounce 2s infinite ease-in-out; }
+        @keyframes bossBounce { 0%, 100% { top: 30%; } 50% { top: 35%; } }
+        .hp-bar-outer { position: absolute; background: #444; border: 4px solid white; height: 40px; overflow: hidden; }
+        #boss-hp-outer { top: 50px; left: 5%; width: 90%; }
+        #boss-hp-fill { background: #32cd32; height: 100%; width: 100%; transition: width 0.3s, background 0.3s; }
+        #player-hp-outer { bottom: 50px; left: 50%; transform: translateX(-50%); width: 300px; }
+        #player-hp-fill { background: #32cd32; height: 100%; width: 100%; transition: width 0.3s; }
+        .hp-text { position: absolute; width: 100%; text-align: center; color: white; font-weight: bold; line-height: 40px; z-index: 5; text-shadow: 2px 2px 0 black; }
+        #boss-name { position: absolute; top: 10px; left: 5%; color: white; font-size: 24px; }
+        #player-label { position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%); color: white; }
+        .fight-btn { position: absolute; bottom: 160px; width: 180px; padding: 15px; border: 3px solid white; border-radius: 15px; font-weight: bold; cursor: pointer; font-size: 16px; }
+        #btn-heal { left: 10%; background: white; color: #ff00ff; }
+        #btn-attack { right: 10%; background: white; color: #ff0000; }
+        .fight-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        #dark-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:black; z-index:20000; }
+        #dialog-text { display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); color:white; font-size:30px; text-align:center; z-index:21000; width: 80%; }
+        #white-flash { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:25000; }
+        .projectile { position: absolute; font-size: 40px; z-index: 16000; transition: all 0.5s ease-in; }
+        .pink-glow { position: fixed; top: 0; left: 0; width: 100%; height: 100%; border: 20px solid rgba(255, 0, 255, 0.3); pointer-events: none; z-index: 17000; opacity: 0; transition: opacity 0.3s; }
     </style>
 </head>
 <body>
 
 <div id="anti-cheat-screen">
     <div>Молодец, отправляйся на тот свет.</div>
+</div>
+
+<div id="dark-overlay"></div>
+<div id="dialog-text"></div>
+<div id="white-flash"></div>
+<div class="pink-glow" id="pink-glow"></div>
+
+<div id="boss-battle-screen">
+    <div id="boss-name">Эль Над</div>
+    <div id="boss-hp-outer" class="hp-bar-outer">
+        <div id="boss-hp-text" class="hp-text">15000 ХП</div>
+        <div id="boss-hp-fill"></div>
+    </div>
+    
+    <img id="boss-img" src="content://media/external/downloads/1000030369" alt="BOSS">
+    
+    <div id="player-label">Ваша Шкала:</div>
+    <div id="player-hp-outer" class="hp-bar-outer">
+        <div id="player-hp-text" class="hp-text">250 ХП</div>
+        <div id="player-hp-fill"></div>
+    </div>
+    
+    <button id="btn-heal" class="fight-btn" onclick="playerHeal()">🌸 Реген Сонг (Вылечиться)</button>
+    <button id="btn-attack" class="fight-btn" onclick="playerAttack()">🌶 Укус (Нанести Урон)</button>
 </div>
 
 <div id="game-screen">
@@ -99,7 +144,7 @@
         <button class="robbery-btn" onclick="stopRobbery()">Вызвать подгон</button>
     </div>
 
-    <div id="admin-cube">Админ Панель 1.8 🐢🌿 @Xn1ckname</div>
+    <div id="admin-cube">Админ Панель 2.0 🌶</div>
 
     <div id="global-announcement">
         <div class="owner-tag">@Xn1ckname [Owner]</div>
@@ -218,7 +263,7 @@
 
     <div class="modal admin-modal" id="admin-panel">
         <div class="close-x" onclick="cls()">×</div>
-        <h2 style="font-size: 24px; color: white; margin-bottom: 5px;">Админ Панель 1.8 🐢🌿 @Xn1ckname</h2>
+        <h2 style="font-size: 24px; color: white; margin-bottom: 5px;">Админ Панель 2.0 🌶</h2>
         <button class="admin-btn" onclick="cheatMoney()">1) Бесконечные деньги — включить.</button>
         <button class="admin-btn" onclick="cheatLevel()">2) Бесконечный Уровень — Включить.</button>
         <div style="border-top: 2px dashed #444; padding-top: 10px;">
@@ -227,6 +272,7 @@
             <button class="confirm-btn" onclick="sendCustomAnnouncement()">ПОДТВЕРДИТЬ</button>
         </div>
         <button class="admin-btn" style="margin-top:10px;" onclick="toggleAllMutations()">Замутировать Все Фрукты/Овощи 🦠</button>
+        <button class="admin-btn" style="margin-top: 10px;" onclick="unlockBossCheat()">Разблокировать Доступ К Боссу</button>
         <button class="admin-btn" style="margin-top: 20px; border-color: red; color: red;" onclick="toggleGodMode()">⚡️ РЕЖИМ БОГА — КЛИК</button>
     </div>
 
@@ -280,6 +326,10 @@
     let adminMutationMode = false;
 
     let reviewQueue = [], lastReviewTime = 0, reviewMessageCooldowns = {};
+
+    // БОСС ПЕРЕМЕННЫЕ
+    let bossHP = 15000, playerHP = 250, isFighting = false;
+    let attackCooldown = false;
 
     const itemDefs = [
         {id:'pom', n:'Помидоры', p:15, r:10, t:12000, e:'🍅', amt:10, mutR: 225}, 
@@ -349,18 +399,14 @@
     document.addEventListener('touchend', () => { isDragging = false; });
     cube.addEventListener('click', () => { if(!isDragging) openW('admin-panel'); });
 
-    function cheatMoney() { money = 9999999999; update(); showPop("ЧИТ: ДЕНЬГИ", "#00ff00"); }
+    function cheatMoney() { money = 9999999999; update(); showPop("ЧИТ: ДЕНЬГИ", "#00ff00"); checkDarkZone(); }
     function cheatLevel() { lvl = 99999999; update(); showPop("ЧИТ: УРОВЕНЬ", "#33e0ff"); }
 
     function toggleGodMode() {
         godMode = !godMode;
         let txt = godMode ? "РЕЖИМ БОГА ВКЛЮЧЕН" : "РЕЖИМ БОГА ОТКЛЮЧЁН";
         showPop(txt, "red");
-        if(godMode) {
-            myReviews = myReviews.filter(r => r.stars > 2);
-            unreadReviews = 0;
-            update();
-        }
+        if(godMode) { myReviews = myReviews.filter(r => r.stars > 2); unreadReviews = 0; update(); }
     }
 
     function toggleAllMutations() {
@@ -369,44 +415,24 @@
         showPop(txt, "#00ff00");
     }
 
-    function handleTurtleClick() {
-        if(lvl < 20) {
-            openW('err-lvl-20');
-        } else {
-            openW('turtle-hire-m');
-        }
-    }
+    function handleTurtleClick() { if(lvl < 20) { openW('err-lvl-20'); } else { openW('turtle-hire-m'); } }
 
     function confirmHireTurtle() {
-        if(money < 3000) {
-            clsOne('turtle-hire-m');
-            openW('turtle-poor-m');
-        } else {
-            money -= 3000;
-            clsOne('turtle-hire-m');
-            openMutationWindow();
-            update();
-        }
+        if(money < 3000) { clsOne('turtle-hire-m'); openW('turtle-poor-m'); } 
+        else { money -= 3000; clsOne('turtle-hire-m'); openMutationWindow(); update(); }
     }
 
     function openMutationWindow() {
-        const list = document.getElementById('mutation-list');
-        list.innerHTML = '';
-        
-        if(gardens.length === 0) {
-            list.innerHTML = '<p style="text-align:center; color:gray; font-weight:bold; padding:20px;">Посадите свои первые фрукты/овощи, чтобы выдать им определенную мутацию.</p>';
-        } else {
+        const list = document.getElementById('mutation-list'); list.innerHTML = '';
+        if(gardens.length === 0) { list.innerHTML = '<p style="text-align:center; color:gray; font-weight:bold; padding:20px;">Посадите свои первые фрукты/овощи, чтобы выдать им определенную мутацию.</p>'; } 
+        else {
             gardens.forEach((g, idx) => {
                 let gardenBlock = `<div style="margin-bottom:20px;"><b style="font-size:18px;">Сад #${idx + 1}</b><div style="margin-top:5px;">`;
                 let hasFruits = false;
                 itemDefs.forEach(itm => {
                     if(!itm.s && g[itm.id] > 0) {
                         hasFruits = true;
-                        gardenBlock += `
-                            <div class="mutation-row">
-                                <span>${itm.e} ${itm.n}</span>
-                                <button class="mut-btn" onclick="applyMutation(${idx}, '${itm.id}')">Замутировать</button>
-                            </div>`;
+                        gardenBlock += `<div class="mutation-row"><span>${itm.e} ${itm.n}</span><button class="mut-btn" onclick="applyMutation(${idx}, '${itm.id}')">Замутировать</button></div>`;
                     }
                 });
                 if(!hasFruits) gardenBlock += '<p style="font-size:12px; color:gray; padding-left:10px;">В этом саду пусто...</p>';
@@ -440,7 +466,6 @@
         if(gardenCount > 0) document.getElementById('garden-hint-text').style.display = 'block';
         if(lvl >= 5) document.getElementById('antenna-func').style.opacity = "1";
         
-        // Визуальное состояние кнопки черепахи
         const tBtn = document.getElementById('turtle-deal');
         if(lvl < 20) tBtn.classList.add('locked'); else tBtn.classList.remove('locked');
 
@@ -472,31 +497,21 @@
 
     function handleReviewsClick() {
         if(gardenCount === 0) { openW('review-no-garden'); } 
-        else {
-            if(myReviews.length === 0) { openW('review-empty-garden'); } 
-            else { renderReviews(); openW('review-list-modal'); unreadReviews = 0; update(); }
-        }
+        else { if(myReviews.length === 0) { openW('review-empty-garden'); } else { renderReviews(); openW('review-list-modal'); unreadReviews = 0; update(); } }
     }
 
     function renderReviews() {
         const container = document.getElementById('reviews-container');
-        if(!container) return;
-        container.innerHTML = '';
+        if(!container) return; container.innerHTML = '';
         myReviews.slice().reverse().forEach(rev => {
-            container.innerHTML += `<div class="review-item">
-                <div style="color:#fcc419; font-size:20px;">${'★'.repeat(rev.stars)}${'☆'.repeat(5-rev.stars)}</div>
-                <p style="margin:5px 0; font-size:16px; font-weight:bold;">${rev.text}</p>
-                <div style="color:gray; font-size:13px; font-family:Arial;">Отзыв про #${rev.gardenNum} огород</div>
-            </div>`;
+            container.innerHTML += `<div class="review-item"><div style="color:#fcc419; font-size:20px;">${'★'.repeat(rev.stars)}${'☆'.repeat(5-rev.stars)}</div><p style="margin:5px 0; font-size:16px; font-weight:bold;">${rev.text}</p><div style="color:gray; font-size:13px; font-family:Arial;">Отзыв про #${rev.gardenNum} огород</div></div>`;
         });
     }
 
     setInterval(() => {
         let now = Date.now();
         if (reviewQueue.length > 0 && now - lastReviewTime >= 7000) {
-            let rev = reviewQueue.shift();
-            myReviews.push(rev);
-            lastReviewTime = now;
+            let rev = reviewQueue.shift(); myReviews.push(rev); lastReviewTime = now;
             if (document.getElementById('review-list-modal').style.display === 'block') { renderReviews(); unreadReviews = 0; } else { unreadReviews++; }
             update();
         }
@@ -506,11 +521,7 @@
         if(godMode && rev.stars <= 2) return;
         let now = Date.now();
         if (reviewMessageCooldowns[rev.text] && (now - reviewMessageCooldowns[rev.text] < 30000)) return;
-        if (Math.random() < 0.25) {
-            reviewMessageCooldowns[rev.text] = now;
-            let finalRev = {...rev, gardenNum: gNum};
-            reviewQueue.push(finalRev);
-        }
+        if (Math.random() < 0.25) { reviewMessageCooldowns[rev.text] = now; let finalRev = {...rev, gardenNum: gNum}; reviewQueue.push(finalRev); }
     }
 
     function buy(id) {
@@ -522,21 +533,13 @@
             document.getElementById('tg-text').innerText = "Ты разблокировал доступ к ТГ каналу! Вбей в поиск «Grow A Garden With Trastratravich» Теперь ты сможешь следить за обновлениями игры. Да, это всё .-.";
             openW('tg-modal');
         } else {
-            money -= itm.p;
-            gardens[activeGardenIdx][id] = (gardens[activeGardenIdx][id] || 0) + itm.amt;
+            money -= itm.p; gardens[activeGardenIdx][id] = (gardens[activeGardenIdx][id] || 0) + itm.amt;
             if (Math.random() < 0.4) { addXP(30); showPop("+30 XP", "#a333c8"); }
         }
         update();
     }
 
-    function upgradeAntenna() {
-        if (activeAntIdx !== null && money >= 350) {
-            money -= 350; antennas[activeAntIdx].income += 10;
-            document.getElementById('ant-val').innerText = antennas[activeAntIdx].income;
-            showPop("УЛУЧШЕНО!", "green"); update();
-        }
-    }
-
+    function upgradeAntenna() { if (activeAntIdx !== null && money >= 350) { money -= 350; antennas[activeAntIdx].income += 10; document.getElementById('ant-val').innerText = antennas[activeAntIdx].income; showPop("УЛУЧШЕНО!", "green"); update(); } }
     function exchangeAntenna() { if (money >= 500) { money -= 500; addXP(350); showPop("+350 XP", "#33e0ff"); update(); } }
     
     function tryBuyAntenna() { 
@@ -547,10 +550,7 @@
     }
     
     function startGo(type) { 
-        if(isBanned) {
-            document.getElementById('err-text').innerText = "Извините, как так ваша репутация упала, нам пришлось забрать ваши права на приобретение новых садов. Вы больше не сможете владеть не единым садом.";
-            openW('err-m'); return;
-        }
+        if(isBanned) { document.getElementById('err-text').innerText = "Извините, как так ваша репутация упала, нам пришлось забрать ваши права на приобретение новых садов. Вы больше не сможете владеть не единым садом."; openW('err-m'); return; }
         if(money >= 500) { cls(); isPlacing = type || 'garden'; document.getElementById('placement-hint').innerText = "Выберите своё местоположение, чтобы начать выращивать сад."; document.getElementById('placement-hint').style.display='block'; } 
     }
     
@@ -562,13 +562,269 @@
         cls(); const screen = document.getElementById('game-screen'); const end = document.getElementById('ending');
         screen.style.transition = 'opacity 5s'; screen.style.opacity = '0';
         setTimeout(() => {
-            end.style.display = 'flex';
-            setTimeout(() => { end.style.opacity = '1'; }, 100);
+            end.style.display = 'flex'; setTimeout(() => { end.style.opacity = '1'; }, 100);
             let lines = ["Ого...", "Ты...", "Ты как это сделал?!", "Эм...", "Подожди, я без шуток.", "Я честно удивлён сильно, без шуток.", "...", "И ты действительно потратил столько часов на эту игру, и чтобы достигнуть своей цели...?", "У меня плохие новости, разуж ты сюда попал, дай расскажу.", "Это конец игры, я без шуток, за это не выдают награду, ты достиг своей цели и попал в тупик...", "THE END."];
             let i = 0;
             function showNext() { if (i < lines.length) { end.innerText = lines[i++]; setTimeout(showNext, 5000); } }
             showNext();
         }, 5000);
+    }
+
+    // ЛОГИКА ТЕМНОЙ ЗОНЫ И БОСС ФАЙТА 2.0
+    function checkDarkZone() {
+        if (money >= 98000) {
+            const hintBtn = document.querySelector('.modal#info-m'); // "Что от меня требуется"
+            // Мы ловим открытие этого окна в основном цикле
+        }
+    }
+
+    // Патчим функцию открытия окна
+    const originalOpenW = openW;
+    openW = function(id) {
+        if (id === 'info-m' && money >= 98000) {
+            originalOpenW(id);
+            setTimeout(() => {
+                if(document.getElementById('info-m').style.display === 'block') {
+                    startDarkZoneSequence();
+                }
+            }, 15000);
+            return;
+        }
+        originalOpenW(id);
+    };
+
+    function startDarkZoneSequence() {
+        cls();
+        document.getElementById('dark-overlay').style.display = 'block';
+        const diag = document.getElementById('dialog-text');
+        diag.style.display = 'block';
+        
+        const lines = [
+            {t: "Ну здравствуй...", d: 4000},
+            {t: "Ты оказался очень даже умным, как бы странно не звучало, ты попал в тёмную зону игры.", d: 4000},
+            {t: "Я прекрасно знаю, что ты здесь не просто так, и ты знаешь об этой зоне. Не какой игрок, не может узнать о ней!", d: 5000},
+            {t: "Но ты... Видимо действительно хочешь узнать правду.", d: 5000},
+            {t: "...", d: 5000},
+            {t: "Разуж ты уже здесь, давай я тебе покажу, кто настоящий босс.", d: 5000}
+        ];
+
+        let i = 0;
+        function step() {
+            if (i < lines.length) {
+                diag.innerText = lines[i].t;
+                setTimeout(() => { i++; step(); }, lines[i].d);
+            } else {
+                diag.style.transition = "opacity 0.5s";
+                diag.style.opacity = "0";
+                setTimeout(() => {
+                    diag.style.display = 'none';
+                    initBossFight();
+                }, 500);
+            }
+        }
+        step();
+    }
+
+    function initBossFight() {
+        document.getElementById('boss-battle-screen').style.display = 'block';
+        const bossImg = document.getElementById('boss-img');
+        const diag = document.getElementById('dialog-text');
+        diag.style.opacity = "1";
+        diag.style.display = 'block';
+        diag.style.top = "70%";
+        diag.innerText = "Посмотрим, на сколько ты везучий.";
+        
+        setTimeout(() => {
+            diag.style.opacity = "0";
+            setTimeout(() => { diag.style.display = 'none'; startBattleLoop(); }, 500);
+        }, 3000);
+    }
+
+    function startBattleLoop() {
+        isFighting = true;
+        bossHP = 15000;
+        playerHP = 250;
+        updateBossUI();
+        
+        // Атака босса каждые 9 секунд
+        const bossInterval = setInterval(() => {
+            if(!isFighting) { clearInterval(bossInterval); return; }
+            bossAttack();
+        }, 9000);
+    }
+
+    function updateBossUI() {
+        document.getElementById('boss-hp-fill').style.width = (bossHP / 15000 * 100) + "%";
+        document.getElementById('boss-hp-text').innerText = bossHP + " ХП";
+        document.getElementById('player-hp-fill').style.width = (playerHP / 250 * 100) + "%";
+        document.getElementById('player-hp-text').innerText = playerHP + " ХП";
+        
+        if (bossHP <= 5000) document.getElementById('boss-hp-fill').style.background = "red";
+    }
+
+    function playerAttack() {
+        if (attackCooldown || !isFighting) return;
+        setCooldown();
+        
+        // Анимация перца
+        const p = document.createElement('div');
+        p.className = 'projectile';
+        p.innerText = '🌶';
+        p.style.left = '50%';
+        p.style.bottom = '150px';
+        document.getElementById('boss-battle-screen').appendChild(p);
+        
+        setTimeout(() => {
+            p.style.bottom = '65%';
+            p.style.transform = 'scale(2)';
+            setTimeout(() => {
+                p.remove();
+                bossHP -= 555;
+                if (bossHP < 0) bossHP = 0;
+                document.getElementById('boss-img').style.filter = "sepia(1) saturate(10) hue-rotate(-50deg)";
+                setTimeout(() => document.getElementById('boss-img').style.filter = "none", 2000);
+                updateBossUI();
+                if (bossHP <= 0) winBattle();
+            }, 500);
+        }, 50);
+    }
+
+    function playerHeal() {
+        if (attackCooldown || !isFighting) return;
+        setCooldown();
+        
+        const glow = document.getElementById('pink-glow');
+        glow.style.opacity = "1";
+        setTimeout(() => {
+            glow.style.opacity = "0";
+            playerHP += 89;
+            if (playerHP > 250) playerHP = 250;
+            updateBossUI();
+        }, 3000);
+    }
+
+    function setCooldown() {
+        attackCooldown = true;
+        document.getElementById('btn-attack').disabled = true;
+        document.getElementById('btn-heal').disabled = true;
+        setTimeout(() => {
+            attackCooldown = false;
+            document.getElementById('btn-attack').disabled = false;
+            document.getElementById('btn-heal').disabled = false;
+        }, 4000);
+    }
+
+    function bossAttack() {
+        const bomb = document.createElement('div');
+        bomb.className = 'projectile';
+        bomb.innerText = '💣';
+        bomb.style.left = '50%';
+        bomb.style.top = '30%';
+        document.getElementById('boss-battle-screen').appendChild(bomb);
+        
+        setTimeout(() => {
+            bomb.style.top = '80%';
+            bomb.style.transform = 'scale(3)';
+            setTimeout(() => {
+                bomb.remove();
+                playerHP -= 93;
+                if (playerHP < 0) playerHP = 0;
+                updateBossUI();
+                
+                // Ослепление
+                document.getElementById('white-flash').style.display = 'block';
+                setTimeout(() => {
+                    document.getElementById('white-flash').style.transition = "opacity 1s";
+                    document.getElementById('white-flash').style.opacity = "0";
+                    setTimeout(() => {
+                        document.getElementById('white-flash').style.display = 'none';
+                        document.getElementById('white-flash').style.opacity = "1";
+                    }, 1000);
+                }, 3000);
+
+                if (playerHP <= 0) loseBattle();
+            }, 500);
+        }, 50);
+    }
+
+    function loseBattle() {
+        isFighting = false;
+        document.getElementById('boss-battle-screen').style.display = 'none';
+        const diag = document.getElementById('dialog-text');
+        diag.style.display = 'block';
+        diag.style.opacity = "1";
+        diag.style.top = "50%";
+        
+        const lines = [
+            {t: "Извини меня.", d: 4000},
+            {t: "Это игра с самого начала была песочницей", d: 6000},
+            {t: "Просыпайся.", d: 6000}
+        ];
+        
+        let i = 0;
+        function step() {
+            if (i < lines.length) {
+                diag.innerText = lines[i].t;
+                setTimeout(() => { i++; step(); }, lines[i].d);
+            } else {
+                document.getElementById('white-flash').style.display = 'flex';
+                document.getElementById('white-flash').innerHTML = '<div style="font-size:100px;">☁️</div>';
+                setTimeout(() => location.reload(), 2000);
+            }
+        }
+        step();
+    }
+
+    function winBattle() {
+        isFighting = false;
+        const bImg = document.getElementById('boss-img');
+        bImg.style.transition = "all 2s";
+        bImg.style.top = "-500px";
+        bImg.style.filter = "brightness(5) contrast(0)";
+        
+        setTimeout(() => {
+            document.getElementById('white-flash').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('boss-battle-screen').style.display = 'none';
+                document.getElementById('dark-overlay').style.display = 'none';
+                const end = document.getElementById('ending');
+                end.style.display = 'flex';
+                end.style.background = 'white';
+                end.style.color = 'black';
+                end.style.opacity = '1';
+                
+                const lines = [
+                    {t: "Ничего себе...", d: 6000},
+                    {t: "Как ты дошёл до такого уровня...?", d: 6000},
+                    {t: "Я очень рад за тебя...", d: 6000},
+                    {t: "...", d: 6000},
+                    {t: "Хочу тебе рассказать одну новость.", d: 6000},
+                    {t: "Будь осторожнее, и не заходи в эту зону...", d: 6000}
+                ];
+                
+                let i = 0;
+                function step() {
+                    if (i < lines.length) {
+                        end.innerText = lines[i].t;
+                        setTimeout(() => { i++; step(); }, lines[i].d);
+                    } else {
+                        end.innerHTML = `
+                            <div style="font-size:80px; font-weight:bold;">THE END</div>
+                            <div style="color:green; font-size:40px; text-shadow: 0 0 10px #82c91e;">ХОРОШАЯ КОНЦВОКА...</div>
+                        `;
+                    }
+                }
+                step();
+            }, 1000);
+        }, 2000);
+    }
+
+    function unlockBossCheat() {
+        money = 98001;
+        update();
+        cls();
+        showPop("ДОСТУП К БОССУ ОТКРЫТ", "red");
+        startDarkZoneSequence();
     }
 
     function startRobbery() {
@@ -634,8 +890,7 @@
     }
 
     function finishGame() {
-        isBanned = true;
-        gardens = []; gardenCount = 0;
+        isBanned = true; gardens = []; gardenCount = 0;
         document.querySelectorAll('.garden-plot').forEach(el => el.remove());
         showPop("РЕПУТАЦИЯ 0", "red");
         update();
@@ -656,21 +911,16 @@
                         setInterval(() => { 
                             if (gardens[currentIdx][itm.id] > 0) { 
                                 gardens[currentIdx][itm.id]--; 
-                                
                                 let income = itm.r;
-                                // ЛОГИКА МУТАЦИИ
                                 if(adminMutationMode || (gardens[currentIdx].mutations && gardens[currentIdx].mutations[itm.id])) {
                                     income = itm.mutR;
-                                    if(!adminMutationMode) gardens[currentIdx].mutations[itm.id] = false; // Одноразовая
+                                    if(!adminMutationMode) gardens[currentIdx].mutations[itm.id] = false;
                                     showPop("МУТАЦИЯ! x4", "#82c91e", e.clientX, e.clientY - 40);
                                 }
-
                                 money += income; 
                                 showPop("+" + income + " монет", "black", e.clientX, e.clientY); 
-                                if(!isRobberyActive || robberyGardenIdx !== currentIdx) {
-                                    if(goodReviews[itm.id]) tryAddReview(goodReviews[itm.id], currentIdx + 1);
-                                }
-                                update(); 
+                                if(!isRobberyActive || robberyGardenIdx !== currentIdx) { if(goodReviews[itm.id]) tryAddReview(goodReviews[itm.id], currentIdx + 1); }
+                                update(); checkDarkZone();
                             } 
                         }, itm.t); 
                     } 
@@ -697,10 +947,8 @@
 
     setInterval(() => {
         if (document.body.innerText.includes("ДЕНЬГИ МАХ") || document.body.innerText.includes("МАХ")) triggerAntiCheat();
-        let imgs = document.getElementsByTagName('img');
-        for (let i = 0; i < imgs.length; i++) { if (imgs[i].src && !imgs[i].src.includes('garden')) triggerAntiCheat(); }
         let divs = document.getElementsByTagName('div');
-        for (let i = 0; i < divs.length; i++) { if (divs[i].style.zIndex > 6000) triggerAntiCheat(); }
+        for (let i = 0; i < divs.length; i++) { if (divs[i].style.zIndex > 50000) triggerAntiCheat(); }
     }, 2000);
 
     update();
