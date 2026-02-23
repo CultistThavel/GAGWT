@@ -590,7 +590,7 @@
     function clsOne(id) { document.getElementById(id).style.display = 'none'; }
 
     /* ========================================================================= */
-    /* ФИНАЛЬНЫЙ БОСС: ЭЛЬ ТАПКО - ЛОГИКА И КОНЦОВКИ (ФИКС) */
+    /* ФИНАЛЬНЫЙ БОСС: ЭЛЬ ТАПКО - ЛОГИКА И КОНЦОВКИ (ФИКС ВЫИГРЫША) */
     /* ========================================================================= */
     function startDarkZoneSequence() {
         cls();
@@ -751,10 +751,8 @@
         }, 50);
     }
 
-    // --- ФИКС ПРОИГРЫША ---
     function loseBattle() {
         isFighting = false;
-        // Мгновенный белый экран
         document.getElementById('white-flash').style.display = 'block';
         document.getElementById('white-flash').style.opacity = '1';
         document.getElementById('boss-battle-screen').style.display = 'none';
@@ -764,7 +762,7 @@
         end.style.background = 'white';
         end.style.color = 'black';
         end.style.opacity = '1';
-        end.innerText = ""; // Очистка
+        end.innerText = "";
 
         const msgLines = [
             "Нет! Нет!",
@@ -780,7 +778,6 @@
                 counter++;
                 setTimeout(showDeathMessage, 6000);
             } else {
-                // Через 4 секунды после последнего сообщения перезагрузка
                 setTimeout(() => {
                     location.reload();
                 }, 4000);
@@ -789,15 +786,20 @@
         showDeathMessage();
     }
 
-    // --- ФИКС ПОБЕДЫ ---
+    // --- ФИКС БАГА: УБИРАЕМ БЕЛЫЙ ЭКРАН И ПОКАЗЫВАЕМ ПОБЕДУ ---
     function winBattle() {
         isFighting = false;
-        // Мгновенный белый экран
-        document.getElementById('white-flash').style.display = 'block';
-        document.getElementById('white-flash').style.opacity = '1';
+        const flash = document.getElementById('white-flash');
+        flash.style.display = 'block';
+        flash.style.opacity = '1';
+        flash.style.zIndex = '20000'; // Уменьшаем z-index, чтобы не мешать финальному тексту
+        
         document.getElementById('boss-battle-screen').style.display = 'none';
 
         setTimeout(() => {
+            flash.style.transition = "opacity 2s";
+            flash.style.opacity = "0";
+            
             const end = document.getElementById('ending');
             end.style.display = 'flex';
             end.style.background = 'white';
@@ -807,10 +809,10 @@
             const winLines = [
                 {t: "Ахринеть...", d: 6000},
                 {t: "Как ты дошёл до этой зоны...?", d: 6000},
-                {t: "Я очень рад за тебя... Я правда гоаоря,  не знаю,  кем тебя называть, но пусть, игрок.", d: 6000},
-                {t: "Кстати, игрок, разуж ты здесь, дай мне тебе рассказать одну новость.", d: 6000},
-                {t: "Ты официально прошёл эту, ты умнее игры. Я честно говоря даже не думал, что ты сюда попадёшь. ", d: 6000},
-                {t: "Мне нечего больше сказать, но послушай меня последний раз. Больше не заходи в эту зону, она разрушена.", d: 6000}
+                {t: "Я очень рад за тебя... Я конечно не знаю, как тебя называть, но пусть будет игрок", d: 6000},
+                {t: "Кстати, игрок, разуж ты здесь, можно я тебе расскажу одну новость?", d: 6000},
+                {t: "Ты официально прошёл игру, как оказалось, ты умнее игры. Я честно говоря думал, что ты в игре останешься навсегда...", d: 6000},
+                {t: "Больше не заходи в эту зону, она разрушена...", d: 6000}
             ];
             
             let i = 0;
@@ -819,13 +821,13 @@
                     end.innerText = winLines[i].t;
                     setTimeout(() => { i++; stepWin(); }, winLines[i].d);
                 } else {
-                    // Победный чёрный текст
                     end.innerHTML = `
                         <div style="font-size:80px; font-weight:bold; margin-bottom:20px; color: black;">THE END.</div>
                         <div style="color:green; font-size:40px; font-weight:bold; animation: glowEnd 2s infinite alternate;">Хорошая Концовка.</div>
                         <div style="color:black; font-size:24px; margin-top:30px;">Спасибо за игру! Проект был сделан пользователем: @Xn1ckname.</div>
                         <style>@keyframes glowEnd { from { text-shadow: 0 0 5px #00ff00; color: #00ff00; } to { text-shadow: 0 0 25px #00ff00; color: #32cd32; } }</style>
                     `;
+                    setTimeout(() => { flash.style.display = 'none'; }, 2000);
                 }
             }
             stepWin();
