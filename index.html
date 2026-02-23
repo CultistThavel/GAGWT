@@ -323,7 +323,7 @@
     
     let unreadReviews = 0, myReviews = [];
     let isRobberyActive = false, robberyInterval = null, robberyGardenIdx = null;
-    let robberyTimeLeft = 35, robberyTimeInterval = null;
+    let robberyTimeLeft = 35, robberyTimeLeftInterval = null;
     let isBanned = false, godMode = false;
     let adminMutationMode = false;
 
@@ -810,7 +810,7 @@
         update();
         cls();
         showPop("ДОСТУП К БОССУ ОТКРЫТ", "red");
-        startDarkZoneSequence(); // Прямой вызов сцены с боссом
+        startDarkZoneSequence();
     }
 
     function startEnd() {
@@ -842,11 +842,11 @@
         alertBox.style.display = 'block';
         setTimeout(() => { alertBox.style.top = '20px'; }, 50);
         
-        robberyTimeInterval = setInterval(() => {
+        robberyTimeLeftInterval = setInterval(() => {
             robberyTimeLeft--;
             document.getElementById('robbery-timer').innerText = robberyTimeLeft;
             if(robberyTimeLeft <= 0) {
-                clearInterval(robberyTimeInterval);
+                clearInterval(robberyTimeLeftInterval);
                 const alertBox = document.getElementById('robbery-alert');
                 alertBox.style.transition = "top 1s ease-in";
                 alertBox.style.top = "-1000px";
@@ -875,14 +875,14 @@
     function stopRobbery(isAuto = false) {
         if(!isAuto) {
             isRobberyActive = false;
-            clearInterval(robberyInterval); clearInterval(robberyTimeInterval);
+            clearInterval(robberyInterval); clearInterval(robberyTimeLeftInterval);
             const alertBox = document.getElementById('robbery-alert');
             alertBox.style.top = '-400px';
             setTimeout(() => { alertBox.style.display = 'none'; }, 500);
             showPop("ОТБИТО!", "#82c91e");
         } else {
             isRobberyActive = false;
-            clearInterval(robberyInterval); clearInterval(robberyTimeInterval);
+            clearInterval(robberyInterval); clearInterval(robberyTimeLeftInterval);
         }
         robberyGardenIdx = null; update();
     }
@@ -953,3 +953,4 @@
 </script>
 </body>
 </html>
+
