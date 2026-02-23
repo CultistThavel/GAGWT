@@ -67,6 +67,7 @@
         .mut-btn { background: #82c91e; color: white; border: none; padding: 8px 15px; border-radius: 10px; cursor: pointer; font-weight: bold; }
         .mut-btn:disabled { background: #ccc; cursor: not-allowed; }
 
+        /* ВЕРСИЯ 2.0: БОСС ФАЙТ - ВОЗВРАЩЕНИЕ ТАПКА */
         #boss-battle-screen { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: black; z-index: 15000; overflow: hidden; }
         #boss-img { position: absolute; left: 50%; top: 30%; transform: translate(-50%, -50%); width: 350px; height: 350px; display: flex; justify-content: center; align-items: center; animation: bossBounce 2s infinite ease-in-out; font-size: 250px; text-shadow: 0 0 50px rgba(255,0,0,0.5); }
         @keyframes bossBounce { 0%, 100% { top: 30%; } 50% { top: 35%; } }
@@ -74,6 +75,7 @@
         #boss-hp-outer { top: 50px; left: 2%; width: 96%; }
         #boss-hp-fill { background: #32cd32; height: 100%; width: 100%; transition: width 0.3s, background 0.3s; }
         
+        /* ШКАЛА ИГРОКА ПЕРЕМЕЩЕНА ВЫШЕ КНОПОК */
         #player-hp-outer { bottom: 280px; left: 50%; transform: translateX(-50%); width: 500px; height: 55px; border: 5px solid #33e0ff; border-radius: 15px; z-index: 16000; }
         #player-hp-fill { background: #32cd32; height: 100%; width: 100%; transition: width 0.3s; }
         .hp-text { position: absolute; width: 100%; text-align: center; color: white; font-weight: bold; line-height: 50px; z-index: 5; text-shadow: 2px 2px 0 black; font-size: 24px; }
@@ -316,6 +318,9 @@
 <div id="ending"></div>
 
 <script>
+    /* ========================================================================= */
+    /* ПЕРЕМЕННЫЕ ОКРУЖЕНИЯ И СОСТОЯНИЯ ИГРЫ */
+    /* ========================================================================= */
     let money = 900, lvl = 1, xp = 0, isPlacing = null, secretPurchased = false;
     let gardenCount = 0, antennaCount = 0;
     let activeGardenIdx = null, activeAntIdx = null;
@@ -329,10 +334,14 @@
 
     let reviewQueue = [], lastReviewTime = 0, reviewMessageCooldowns = {};
 
+    // БОСС ПЕРЕМЕННЫЕ 2.0 (ВОЗВРАЩЕНИЕ ТАПКА)
     let bossHP = 20000, playerHP = 250, isFighting = false;
     let attackCooldown = false;
     let darkZoneTriggered = false;
 
+    /* ========================================================================= */
+    /* ОПРЕДЕЛЕНИЕ ПРЕДМЕТОВ И ОТЗЫВОВ */
+    /* ========================================================================= */
     const itemDefs = [
         {id:'pom', n:'Помидоры', p:15, r:10, t:12000, e:'🍅', amt:10, mutR: 225}, 
         {id:'ogur', n:'Огурцы', p:5, r:6, t:16000, e:'🥒', amt:10, mutR: 125},
@@ -360,9 +369,12 @@
         { text: "НУ И БРЕД, КУПИЛА ЗНАЧИТ У ВАС КИЛОГРАММ КЛУБНИКИ, МАЛО ТОГО, ЧТО ОНА ОЧЕНЬ ДОРОГАЯ, ТАК И ЕЩЁ КОГДА МНЕ ЕЁ ВЫДАЛИ В РУКИ, СРАЗУ ЖЕ ВЫХВАТИЛ КАКОЙ-ТО ПАРЕНЬ, НИ ОХРАНЫ, НИЧЕГО! ОСТАЛАСЬ БЕЗ ДЕНЕГ И КЛУБНИКИ, СПАСИБО!", stars: 1 },
         { text: "Ну и что это значит? Хожу я значит по саду, чтобы выбрать себе фрукт, и вижу, как толпа подростков нагло срывают арбузы с огорода и убегают. Есть у вас вообще внимательность?", stars: 2 },
         { text: "Я конечно всё понимаю, но думаю, вам нужно больше внимательности.", stars: 2 },
-        { text: "Ну спасибо, вместо того, чтобы нормально следить за садом, вы пускаете левых гопников. Взял я одну тыкву, и три подростка выхватили её у меня, причём настолько быстро, что даже моргнуть не успел, и на моих глазах один из них пнул мою тыкву ногой, а затем запинай её, я решил податься и уйти. Больше не прийду к вам.", stars: 1 }
+        { text: "Ну спасибо, вместо того, чтобы нормально следить за садом, вы пускаете левых гопников. Взял я одну тыкву, и три подростка выхватили её у меня, причём настолько быстро, что даже моргнуть не успел, и на моих глазах один из них пнул мою тыкву ногой, а затем запинали её, я решил податься и уйти. Больше не прийду к вам.", stars: 1 }
     ];
 
+    /* ========================================================================= */
+    /* ГЛОБАЛЬНЫЕ СОБЫТИЯ И АДМИНКА */
+    /* ========================================================================= */
     window.addEventListener('storage', (e) => { if (e.key === 'global_announcement') showAnnouncementUI(e.newValue); });
 
     function showAnnouncementUI(text) {
@@ -417,6 +429,9 @@
         showPop(txt, "#00ff00");
     }
 
+    /* ========================================================================= */
+    /* ЧЕРЕПАХА И МУТАЦИИ */
+    /* ========================================================================= */
     function handleTurtleClick() { if(lvl < 20) { openW('err-lvl-20'); } else { openW('turtle-hire-m'); } }
 
     function confirmHireTurtle() {
@@ -454,6 +469,9 @@
         openW('mut-success-m');
     }
 
+    /* ========================================================================= */
+    /* ЛОГИКА ОБНОВЛЕНИЯ И ИНТЕРФЕЙСА */
+    /* ========================================================================= */
     function update() {
         document.getElementById('m-val').innerText = Math.floor(money);
         document.getElementById('l-val').innerText = lvl;
@@ -571,6 +589,9 @@
     function cls() { document.querySelectorAll('.modal').forEach(m => m.style.display='none'); activeGardenIdx = null; activeAntIdx = null; }
     function clsOne(id) { document.getElementById(id).style.display = 'none'; }
 
+    /* ========================================================================= */
+    /* ФИНАЛЬНЫЙ БОСС: ЭЛЬ ТАПКО - ЛОГИКА И КОНЦОВКИ (ФИКС) */
+    /* ========================================================================= */
     function startDarkZoneSequence() {
         cls();
         document.getElementById('dark-overlay').style.display = 'block';
@@ -730,83 +751,90 @@
         }, 50);
     }
 
+    // --- ФИКС ПРОИГРЫША ---
     function loseBattle() {
         isFighting = false;
-        const flash = document.getElementById('white-flash');
-        flash.style.display = 'block';
-        flash.style.opacity = '1';
+        // Мгновенный белый экран
+        document.getElementById('white-flash').style.display = 'block';
+        document.getElementById('white-flash').style.opacity = '1';
+        document.getElementById('boss-battle-screen').style.display = 'none';
+
+        const end = document.getElementById('ending');
+        end.style.display = 'flex';
+        end.style.background = 'white';
+        end.style.color = 'black';
+        end.style.opacity = '1';
+        end.innerText = ""; // Очистка
+
+        const msgLines = [
+            "Нет! Нет!",
+            "Ты не можешь сдаться!",
+            "Просто постарайся!",
+            "Просыпайся!"
+        ];
         
-        setTimeout(() => {
-            const end = document.getElementById('ending');
-            end.style.display = 'flex';
-            end.style.background = 'white';
-            end.style.color = 'black';
-            end.style.opacity = '1';
-            
-            const lines = [
-                {t: "Нет!", d: 6000},
-                {t: "Нет!", d: 6000},
-                {t: "Ты не можешь сдаться!", d: 6000},
-                {t: "Просто постарайся!", d: 6000},
-                {t: "Просыпайся!", d: 4000}
-            ];
-            
-            let i = 0;
-            function step() {
-                if (i < lines.length) {
-                    end.innerText = lines[i].t;
-                    let delay = lines[i].d;
-                    i++;
-                    setTimeout(step, delay);
-                } else {
+        let counter = 0;
+        function showDeathMessage() {
+            if (counter < msgLines.length) {
+                end.innerText = msgLines[counter];
+                counter++;
+                setTimeout(showDeathMessage, 6000);
+            } else {
+                // Через 4 секунды после последнего сообщения перезагрузка
+                setTimeout(() => {
                     location.reload();
-                }
+                }, 4000);
             }
-            step();
-        }, 100);
+        }
+        showDeathMessage();
     }
 
+    // --- ФИКС ПОБЕДЫ ---
     function winBattle() {
         isFighting = false;
-        const flash = document.getElementById('white-flash');
-        flash.style.display = 'block';
-        flash.style.opacity = '1';
-        
+        // Мгновенный белый экран
+        document.getElementById('white-flash').style.display = 'block';
+        document.getElementById('white-flash').style.opacity = '1';
+        document.getElementById('boss-battle-screen').style.display = 'none';
+
         setTimeout(() => {
-            document.getElementById('boss-battle-screen').style.display = 'none';
             const end = document.getElementById('ending');
             end.style.display = 'flex';
             end.style.background = 'white';
             end.style.color = 'black';
             end.style.opacity = '1';
             
-            const lines = [
+            const winLines = [
                 {t: "Ахринеть...", d: 6000},
                 {t: "Как ты дошёл до этой зоны...?", d: 6000},
-                {t: "Я очень рад за тебя... Не знаю, кем тебя называть, но пусть будет игрок.", d: 6000},
-                {t: "Кстати, разуж ты уже здесь, я хочу тебе рассказать одну новость. ", d: 6000},
-                {t: "Ты официально прошёл эту игру, ты умнее игры. Ты дошёл до финальной зоны, в которой никто ещё не был.", d: 6000},
-                {t: "Больше не заходи в эту зону, она разрушена...", d: 6000}
+                {t: "Я очень рад за тебя... Я правда гоаоря,  не знаю,  кем тебя называть, но пусть, игрок.", d: 6000},
+                {t: "Кстати, игрок, разуж ты здесь, дай мне тебе рассказать одну новость.", d: 6000},
+                {t: "Ты официально прошёл эту, ты умнее игры. Я честно говоря даже не думал, что ты сюда попадёшь. ", d: 6000},
+                {t: "Мне нечего больше сказать, но послушай меня последний раз. Больше не заходи в эту зону, она разрушена.", d: 6000}
             ];
             
             let i = 0;
-            function step() {
-                if (i < lines.length) {
-                    end.innerText = lines[i].t;
-                    setTimeout(() => { i++; step(); }, lines[i].d);
+            function stepWin() {
+                if (i < winLines.length) {
+                    end.innerText = winLines[i].t;
+                    setTimeout(() => { i++; stepWin(); }, winLines[i].d);
                 } else {
+                    // Победный чёрный текст
                     end.innerHTML = `
-                        <div style="font-size:80px; font-weight:bold; margin-bottom:20px; color:black;">THE END.</div>
+                        <div style="font-size:80px; font-weight:bold; margin-bottom:20px; color: black;">THE END.</div>
                         <div style="color:green; font-size:40px; font-weight:bold; animation: glowEnd 2s infinite alternate;">Хорошая Концовка.</div>
                         <div style="color:black; font-size:24px; margin-top:30px;">Спасибо за игру! Проект был сделан пользователем: @Xn1ckname.</div>
                         <style>@keyframes glowEnd { from { text-shadow: 0 0 5px #00ff00; color: #00ff00; } to { text-shadow: 0 0 25px #00ff00; color: #32cd32; } }</style>
                     `;
                 }
             }
-            step();
+            stepWin();
         }, 1000);
     }
 
+    /* ========================================================================= */
+    /* ОСТАЛЬНЫЕ ФУНКЦИИ И СКРИПТЫ */
+    /* ========================================================================= */
     function unlockBossCheat() {
         money = 98001;
         update();
@@ -947,3 +975,4 @@
 </script>
 </body>
 </html>
+
