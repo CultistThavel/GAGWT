@@ -323,7 +323,7 @@
     
     let unreadReviews = 0, myReviews = [];
     let isRobberyActive = false, robberyInterval = null, robberyGardenIdx = null;
-    let robberyTimeLeft = 35, robberyTimerInterval = null;
+    let robberyTimeLeft = 35, robberyTimeInterval = null;
     let isBanned = false, godMode = false;
     let adminMutationMode = false;
 
@@ -557,7 +557,6 @@
         if(money >= 500) { cls(); isPlacing = type || 'garden'; document.getElementById('placement-hint').innerText = "Выберите своё местоположение, чтобы начать выращивать сад."; document.getElementById('placement-hint').style.display='block'; } 
     }
     
-    // ПЕРЕОПРЕДЕЛЯЕМ ФУНКЦИЮ ОТКРЫТИЯ ДЛЯ ТЕМНОЙ ЗОНЫ
     function openW(id) { 
         document.getElementById(id).style.display = 'block'; 
         if(id === 'info-m' && money >= 98000 && !darkZoneTriggered) {
@@ -665,7 +664,7 @@
                 bossHP -= 555;
                 if (bossHP < 0) bossHP = 0;
                 document.getElementById('boss-img').style.filter = "sepia(1) saturate(10) hue-rotate(-50deg)";
-                setTimeout(() => document.getElementById('boss-img').style.filter = "none", 2000);
+                setTimeout(() => document.getElementById('boss-img').style.filter = "none", 500);
                 updateBossUI();
                 if (bossHP <= 0) winBattle();
             }, 500);
@@ -683,7 +682,7 @@
             playerHP += 89;
             if (playerHP > 250) playerHP = 250;
             updateBossUI();
-        }, 3000);
+        }, 1500);
     }
 
     function setCooldown() {
@@ -724,7 +723,7 @@
                         document.getElementById('white-flash').style.display = 'none';
                         document.getElementById('white-flash').style.transition = "none";
                     }, 1000);
-                }, 3000);
+                }, 500);
 
                 if (playerHP <= 0) loseBattle();
             }, 500);
@@ -811,7 +810,7 @@
         update();
         cls();
         showPop("ДОСТУП К БОССУ ОТКРЫТ", "red");
-        startDarkZoneSequence();
+        startDarkZoneSequence(); // Прямой вызов сцены с боссом
     }
 
     function startEnd() {
@@ -843,11 +842,11 @@
         alertBox.style.display = 'block';
         setTimeout(() => { alertBox.style.top = '20px'; }, 50);
         
-        robberyTimerInterval = setInterval(() => {
+        robberyTimeInterval = setInterval(() => {
             robberyTimeLeft--;
             document.getElementById('robbery-timer').innerText = robberyTimeLeft;
             if(robberyTimeLeft <= 0) {
-                clearInterval(robberyTimerInterval);
+                clearInterval(robberyTimeInterval);
                 const alertBox = document.getElementById('robbery-alert');
                 alertBox.style.transition = "top 1s ease-in";
                 alertBox.style.top = "-1000px";
@@ -876,14 +875,14 @@
     function stopRobbery(isAuto = false) {
         if(!isAuto) {
             isRobberyActive = false;
-            clearInterval(robberyInterval); clearInterval(robberyTimerInterval);
+            clearInterval(robberyInterval); clearInterval(robberyTimeInterval);
             const alertBox = document.getElementById('robbery-alert');
             alertBox.style.top = '-400px';
             setTimeout(() => { alertBox.style.display = 'none'; }, 500);
             showPop("ОТБИТО!", "#82c91e");
         } else {
             isRobberyActive = false;
-            clearInterval(robberyInterval); clearInterval(robberyTimerInterval);
+            clearInterval(robberyInterval); clearInterval(robberyTimeInterval);
         }
         robberyGardenIdx = null; update();
     }
