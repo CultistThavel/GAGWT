@@ -68,28 +68,28 @@
         .mut-btn { background: #82c91e; color: white; border: none; padding: 8px 15px; border-radius: 10px; cursor: pointer; font-weight: bold; }
         .mut-btn:disabled { background: #ccc; cursor: not-allowed; }
 
-        /* ВЕРСИЯ 2.0: БОСС ФАЙТ */
+        /* ВЕРСИЯ 2.0: БОСС ФАЙТ ТАПОК */
         #boss-battle-screen { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: black; z-index: 15000; overflow: hidden; }
-        #boss-img { position: absolute; left: 50%; top: 30%; transform: translate(-50%, -50%); width: 300px; height: 300px; border: 5px solid white; animation: bossBounce 2s infinite ease-in-out; background: #222; }
+        #boss-img { position: absolute; left: 50%; top: 30%; transform: translate(-50%, -50%); width: 350px; height: 350px; display: flex; justify-content: center; align-items: center; font-size: 250px; animation: bossBounce 2s infinite ease-in-out; }
         @keyframes bossBounce { 0%, 100% { top: 30%; } 50% { top: 35%; } }
-        .hp-bar-outer { position: absolute; background: #444; border: 4px solid white; height: 40px; overflow: hidden; }
-        #boss-hp-outer { top: 50px; left: 5%; width: 90%; }
+        .hp-bar-outer { position: absolute; background: #444; border: 4px solid white; height: 50px; overflow: hidden; }
+        #boss-hp-outer { top: 50px; left: 2%; width: 96%; }
         #boss-hp-fill { background: #32cd32; height: 100%; width: 100%; transition: width 0.3s, background 0.3s; }
-        #player-hp-outer { bottom: 50px; left: 50%; transform: translateX(-50%); width: 300px; }
+        #player-hp-outer { bottom: 50px; left: 50%; transform: translateX(-50%); width: 400px; height: 40px; }
         #player-hp-fill { background: #32cd32; height: 100%; width: 100%; transition: width 0.3s; }
-        .hp-text { position: absolute; width: 100%; text-align: center; color: white; font-weight: bold; line-height: 40px; z-index: 5; text-shadow: 2px 2px 0 black; }
-        #boss-name { position: absolute; top: 10px; left: 5%; color: white; font-size: 24px; }
-        #player-label { position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%); color: white; }
-        .fight-btn { position: absolute; bottom: 160px; width: 220px; padding: 15px; border: 3px solid white; border-radius: 15px; font-weight: bold; cursor: pointer; font-size: 16px; transition: transform 0.1s; }
-        .fight-btn:active { transform: scale(0.95); }
+        .hp-text { position: absolute; width: 100%; text-align: center; color: white; font-weight: bold; line-height: 40px; z-index: 5; text-shadow: 2px 2px 0 black; font-size: 22px; }
+        #boss-name { position: absolute; top: 10px; left: 2%; color: white; font-size: 28px; }
+        #player-label { position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%); color: white; font-size: 20px; }
+        .fight-btn { position: absolute; bottom: 160px; width: 220px; padding: 15px; border: 3px solid white; border-radius: 15px; font-weight: bold; cursor: pointer; font-size: 18px; }
         #btn-heal { left: 10%; background: white; color: #ff00ff; }
         #btn-attack { right: 10%; background: white; color: #ff0000; }
         .fight-btn:disabled { opacity: 0.5; cursor: not-allowed; }
         #dark-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:black; z-index:20000; }
-        #dialog-text { display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); color:white; font-size:30px; text-align:center; z-index:21000; width: 80%; }
+        #dialog-text { display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); color:white; font-size:35px; text-align:center; z-index:21000; width: 85%; }
         #white-flash { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:25000; }
-        .projectile { position: absolute; font-size: 60px; z-index: 16000; transition: all 0.5s ease-in; pointer-events: none; }
-        .pink-glow { position: fixed; top: 0; left: 0; width: 100%; height: 100%; border: 30px solid rgba(255, 0, 255, 0.4); pointer-events: none; z-index: 17000; opacity: 0; transition: opacity 0.3s; }
+        .projectile { position: absolute; font-size: 60px; z-index: 16000; transition: all 0.5s ease-in; }
+        .pink-glow { position: fixed; top: 0; left: 0; width: 100%; height: 100%; border: 25px solid rgba(255, 0, 255, 0.4); pointer-events: none; z-index: 17000; opacity: 0; transition: opacity 0.3s; }
+        #damage-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,0,0,0.3); pointer-events: none; z-index: 15500; }
     </style>
 </head>
 <body>
@@ -102,6 +102,7 @@
 <div id="dialog-text"></div>
 <div id="white-flash"></div>
 <div class="pink-glow" id="pink-glow"></div>
+<div id="damage-overlay"></div>
 
 <div id="boss-battle-screen">
     <div id="boss-name">Эль Над</div>
@@ -110,15 +111,15 @@
         <div id="boss-hp-fill"></div>
     </div>
     
-    <img id="boss-img" src="IMG_20260213_133114_727.jpg" alt="BOSS" onerror="this.src='https://via.placeholder.com/300/000000/FFFFFF?text=EL+NAD+2.0'">
+    <div id="boss-img">🩴</div>
     
     <div id="player-label">Ваша Шкала: 250 ХП.</div>
     <div id="player-hp-outer" class="hp-bar-outer">
-        <div id="player-hp-text" class="hp-text">250 ХП</div>
+        <div id="player-hp-text" class="hp-text">Ваша Шкала: 250 ХП.</div>
         <div id="player-hp-fill"></div>
     </div>
     
-    <button id="btn-heal" class="fight-btn" onclick="playerHeal()">🌸 Реген Сонг (Вылечиться)</button>
+    <button id="btn-heal" class="fight-btn" onclick="playerHeal()">🌸+ Реген Сонг (Вылечиться)</button>
     <button id="btn-attack" class="fight-btn" onclick="playerAttack()">🌶 Укус (Нанести Урон)</button>
 </div>
 
@@ -301,7 +302,7 @@
 
     <div class="modal" id="info-m">
         <div class="close-x" onclick="cls()">×</div>
-        <h3 style="color:black; font-size: 26px; margin-bottom: 15px;">Чё от меня требуется</h3>
+        <h3 style="color:black; font-size: 26px; margin-bottom: 15px;">Что от меня требуется</h3>
         <p style="color:black; font-size: 18px;">Карочи, тут нада виращивать сад с Трастратравичем и карочи ОН ЛЕТАТЬ УМЕЕ.</p>
         <p style="font-size:12px; color:gray; margin-top: 30px;">Создатель: Александр Фиримон Русланович.</p>
     </div>
@@ -322,7 +323,7 @@
     
     let unreadReviews = 0, myReviews = [];
     let isRobberyActive = false, robberyInterval = null, robberyGardenIdx = null;
-    let robberyTimeLeft = 35, robberyTimeInterval = null;
+    let robberyTimeLeft = 35, robberyTimerInterval = null;
     let isBanned = false, godMode = false;
     let adminMutationMode = false;
 
@@ -331,7 +332,7 @@
     // БОСС ПЕРЕМЕННЫЕ 2.0
     let bossHP = 15000, playerHP = 250, isFighting = false;
     let attackCooldown = false;
-    let bossFightInterval = null;
+    let darkZoneTriggered = false;
 
     const itemDefs = [
         {id:'pom', n:'Помидоры', p:15, r:10, t:12000, e:'🍅', amt:10, mutR: 225}, 
@@ -556,21 +557,29 @@
         if(money >= 500) { cls(); isPlacing = type || 'garden'; document.getElementById('placement-hint').innerText = "Выберите своё местоположение, чтобы начать выращивать сад."; document.getElementById('placement-hint').style.display='block'; } 
     }
     
+    // ПЕРЕОПРЕДЕЛЯЕМ ФУНКЦИЮ ОТКРЫТИЯ ДЛЯ ТЕМНОЙ ЗОНЫ
     function openW(id) { 
-        if(id === 'info-m' && money >= 98000) {
-            document.getElementById(id).style.display = 'block';
-            setTimeout(() => { if(document.getElementById(id).style.display === 'block') startDarkZone(); }, 15000);
-            return;
-        }
         document.getElementById(id).style.display = 'block'; 
+        if(id === 'info-m' && money >= 98000 && !darkZoneTriggered) {
+            darkZoneTriggered = true;
+            setTimeout(() => {
+                if(document.getElementById('info-m').style.display === 'block') {
+                    startDarkZoneSequence();
+                }
+            }, 15000);
+        }
     }
+    
     function cls() { document.querySelectorAll('.modal').forEach(m => m.style.display='none'); activeGardenIdx = null; activeAntIdx = null; }
     function clsOne(id) { document.getElementById(id).style.display = 'none'; }
 
-    // 2.0: ЛОГИКА ТЕМНОЙ ЗОНЫ
-    function startDarkZone() {
-        cls(); document.getElementById('dark-overlay').style.display = 'block';
-        const diag = document.getElementById('dialog-text'); diag.style.display = 'block';
+    // ЛОГИКА ТЕМНОЙ ЗОНЫ И БОСС ФАЙТА 2.0
+    function startDarkZoneSequence() {
+        cls();
+        document.getElementById('dark-overlay').style.display = 'block';
+        const diag = document.getElementById('dialog-text');
+        diag.style.display = 'block';
+        
         const lines = [
             {t: "Ну здравствуй...", d: 4000},
             {t: "Ты оказался очень даже умным, как бы странно не звучало, ты попал в тёмную зону игры.", d: 4000},
@@ -579,119 +588,232 @@
             {t: "...", d: 5000},
             {t: "Разуж ты уже здесь, давай я тебе покажу, кто настоящий босс.", d: 5000}
         ];
+
         let i = 0;
-        function showLine() {
-            if(i < lines.length) { diag.innerText = lines[i].t; setTimeout(() => { i++; showLine(); }, lines[i].d); }
-            else { 
-                diag.style.animation = "floatUp 0.5s forwards"; 
-                setTimeout(() => { diag.style.display = 'none'; initBossBattle(); }, 500);
+        function step() {
+            if (i < lines.length) {
+                diag.innerText = lines[i].t;
+                let delay = lines[i].d;
+                setTimeout(() => { i++; step(); }, delay);
+            } else {
+                diag.style.transition = "opacity 0.5s";
+                diag.style.opacity = "0";
+                setTimeout(() => {
+                    diag.style.display = 'none';
+                    diag.style.opacity = "1";
+                    initBossFight();
+                }, 500);
             }
         }
-        showLine();
+        step();
     }
 
-    function initBossBattle() {
+    function initBossFight() {
         document.getElementById('boss-battle-screen').style.display = 'block';
-        const diag = document.getElementById('dialog-text'); diag.innerText = "Посмотрим, на сколько ты везучий.";
-        diag.style.display = 'block'; diag.style.top = "75%";
-        setTimeout(() => { diag.style.display = 'none'; startFight(); }, 3000);
+        const diag = document.getElementById('dialog-text');
+        diag.style.display = 'block';
+        diag.style.top = "75%";
+        diag.innerText = "Посмотрим, на сколько ты везучий.";
+        
+        setTimeout(() => {
+            diag.style.transition = "opacity 0.5s";
+            diag.style.opacity = "0";
+            setTimeout(() => { 
+                diag.style.display = 'none'; 
+                diag.style.opacity = "1";
+                startBattleLoop(); 
+            }, 500);
+        }, 3000);
     }
 
-    function startFight() {
-        isFighting = true; bossHP = 15000; playerHP = 250; updateBossUI();
-        bossFightInterval = setInterval(() => { if(isFighting) bossAttack(); }, 9000);
+    function startBattleLoop() {
+        isFighting = true;
+        bossHP = 15000;
+        playerHP = 250;
+        updateBossUI();
+        
+        const bossInterval = setInterval(() => {
+            if(!isFighting) { clearInterval(bossInterval); return; }
+            bossAttack();
+        }, 9000);
     }
 
     function updateBossUI() {
-        document.getElementById('boss-hp-fill').style.width = (bossHP/15000*100) + "%";
+        document.getElementById('boss-hp-fill').style.width = (bossHP / 15000 * 100) + "%";
         document.getElementById('boss-hp-text').innerText = bossHP + " ХП";
-        document.getElementById('player-hp-fill').style.width = (playerHP/250*100) + "%";
+        document.getElementById('player-hp-fill').style.width = (playerHP / 250 * 100) + "%";
         document.getElementById('player-hp-text').innerText = "Ваша Шкала: " + playerHP + " ХП.";
+        document.getElementById('player-label').innerText = "Ваша Шкала: " + playerHP + " ХП.";
     }
 
     function playerAttack() {
-        if(attackCooldown || !isFighting) return;
-        attackCooldown = true; btnState(true);
-        const p = document.createElement('div'); p.className = 'projectile'; p.innerText = '🌶';
-        p.style.left = '50%'; p.style.bottom = '200px'; document.getElementById('boss-battle-screen').appendChild(p);
+        if (attackCooldown || !isFighting) return;
+        setCooldown();
+        
+        const p = document.createElement('div');
+        p.className = 'projectile';
+        p.innerText = '🌶';
+        p.style.left = '50%';
+        p.style.bottom = '150px';
+        document.getElementById('boss-battle-screen').appendChild(p);
+        
         setTimeout(() => {
-            p.style.bottom = '65%'; p.style.transform = 'scale(2)';
+            p.style.bottom = '65%';
+            p.style.transform = 'scale(2) rotate(360deg)';
             setTimeout(() => {
-                p.remove(); bossHP -= 555; if(bossHP < 0) bossHP = 0;
-                const bImg = document.getElementById('boss-img'); bImg.style.filter = "sepia(1) saturate(10) hue-rotate(-50deg)";
-                setTimeout(() => bImg.style.filter = "none", 2000);
-                updateBossUI(); if(bossHP <= 0) winFight();
-                setTimeout(() => { attackCooldown = false; btnState(false); }, 4000);
+                p.remove();
+                bossHP -= 555;
+                if (bossHP < 0) bossHP = 0;
+                document.getElementById('boss-img').style.filter = "sepia(1) saturate(10) hue-rotate(-50deg)";
+                setTimeout(() => document.getElementById('boss-img').style.filter = "none", 2000);
+                updateBossUI();
+                if (bossHP <= 0) winBattle();
             }, 500);
         }, 50);
     }
 
     function playerHeal() {
-        if(attackCooldown || !isFighting) return;
-        attackCooldown = true; btnState(true);
-        const glow = document.getElementById('pink-glow'); glow.style.opacity = "1";
+        if (attackCooldown || !isFighting) return;
+        setCooldown();
+        
+        const glow = document.getElementById('pink-glow');
+        glow.style.opacity = "1";
         setTimeout(() => {
-            glow.style.opacity = "0"; playerHP += 89; if(playerHP > 250) playerHP = 250;
+            glow.style.opacity = "0";
+            playerHP += 89;
+            if (playerHP > 250) playerHP = 250;
             updateBossUI();
-            setTimeout(() => { attackCooldown = false; btnState(false); }, 4000);
         }, 3000);
     }
 
-    function btnState(s) { document.getElementById('btn-attack').disabled = s; document.getElementById('btn-heal').disabled = s; }
+    function setCooldown() {
+        attackCooldown = true;
+        document.getElementById('btn-attack').disabled = true;
+        document.getElementById('btn-heal').disabled = true;
+        setTimeout(() => {
+            attackCooldown = false;
+            document.getElementById('btn-attack').disabled = false;
+            document.getElementById('btn-heal').disabled = false;
+        }, 4000);
+    }
 
     function bossAttack() {
-        const b = document.createElement('div'); b.className = 'projectile'; b.innerText = '💣';
-        b.style.left = '50%'; b.style.top = '30%'; document.getElementById('boss-battle-screen').appendChild(b);
+        if(!isFighting) return;
+        const bomb = document.createElement('div');
+        bomb.className = 'projectile';
+        bomb.innerText = '💣';
+        bomb.style.left = '50%';
+        bomb.style.top = '30%';
+        document.getElementById('boss-battle-screen').appendChild(bomb);
+        
         setTimeout(() => {
-            b.style.top = '80%'; b.style.transform = 'scale(3)';
+            bomb.style.top = '80%';
+            bomb.style.transform = 'scale(3)';
             setTimeout(() => {
-                b.remove(); playerHP -= 93; if(playerHP < 0) playerHP = 0; updateBossUI();
-                const flash = document.getElementById('white-flash'); flash.style.display = 'block';
-                setTimeout(() => { flash.style.transition = "opacity 1s"; flash.style.opacity = "0"; 
-                    setTimeout(() => { flash.style.display = 'none'; flash.style.opacity = "1"; flash.style.transition = "none"; }, 1000);
+                bomb.remove();
+                playerHP -= 93;
+                if (playerHP < 0) playerHP = 0;
+                updateBossUI();
+                
+                document.getElementById('white-flash').style.display = 'block';
+                document.getElementById('white-flash').style.opacity = '1';
+                setTimeout(() => {
+                    document.getElementById('white-flash').style.transition = "opacity 1s";
+                    document.getElementById('white-flash').style.opacity = "0";
+                    setTimeout(() => {
+                        document.getElementById('white-flash').style.display = 'none';
+                        document.getElementById('white-flash').style.transition = "none";
+                    }, 1000);
                 }, 3000);
-                if(playerHP <= 0) loseFight();
+
+                if (playerHP <= 0) loseBattle();
             }, 500);
         }, 50);
     }
 
-    function loseFight() {
-        isFighting = false; clearInterval(bossFightInterval);
+    function loseBattle() {
+        isFighting = false;
         document.getElementById('boss-battle-screen').style.display = 'none';
-        const diag = document.getElementById('dialog-text'); diag.style.display = 'block'; diag.style.top = '50%';
-        const lines = ["Извини меня.", "Это игра с самого начала была песочницей", "Просыпайся."];
+        const diag = document.getElementById('dialog-text');
+        diag.style.display = 'block';
+        diag.style.opacity = "1";
+        diag.style.top = "50%";
+        
+        const lines = [
+            {t: "Извини меня.", d: 4000},
+            {t: "Это игра с самого начала была песочницей", d: 6000},
+            {t: "Просыпайся.", d: 6000}
+        ];
+        
         let i = 0;
         function step() {
-            if(i < lines.length) { diag.innerText = lines[i++]; setTimeout(step, 5000); }
-            else { document.getElementById('white-flash').style.display = 'block'; setTimeout(() => location.reload(), 2000); }
+            if (i < lines.length) {
+                diag.innerText = lines[i].t;
+                setTimeout(() => { i++; step(); }, lines[i].d);
+            } else {
+                document.getElementById('white-flash').style.display = 'flex';
+                document.getElementById('white-flash').style.opacity = '1';
+                document.getElementById('white-flash').innerHTML = '<div style="font-size:100px;">☁️</div>';
+                setTimeout(() => location.reload(), 2000);
+            }
         }
         step();
     }
 
-    function winFight() {
-        isFighting = false; clearInterval(bossFightInterval);
-        const bImg = document.getElementById('boss-img'); bImg.style.transition = "all 2s"; bImg.style.top = "-500px"; bImg.style.filter = "brightness(5)";
+    function winBattle() {
+        isFighting = false;
+        const bImg = document.getElementById('boss-img');
+        bImg.style.transition = "all 2s";
+        bImg.style.top = "-500px";
+        bImg.style.filter = "brightness(5) contrast(0)";
+        
         setTimeout(() => {
-            document.getElementById('boss-battle-screen').style.display = 'none';
-            document.getElementById('dark-overlay').style.display = 'none';
-            const end = document.getElementById('ending'); end.style.display = 'flex'; end.style.background = 'white'; end.style.color = 'black'; end.style.opacity = '1';
-            const lines = ["Ничего себе...", "Как ты дошёл до такого уровня...?", "Я очень рад за тебя...", "...", "Хочу тебе рассказать одну новость.", "Будь осторожнее, и не заходи в эту зону..."];
-            let i = 0;
-            function step() {
-                if(i < lines.length) { end.innerText = lines[i++]; setTimeout(step, 6000); }
-                else { end.innerHTML = '<div style="font-size:80px; font-weight:bold;">THE END</div><div style="color:green; font-size:40px; text-shadow:0 0 10px #82c91e; animation: bossBounce 1s infinite;">ХОРОШАЯ КОНЦВОКА...</div>'; }
-            }
-            step();
+            document.getElementById('white-flash').style.display = 'block';
+            document.getElementById('white-flash').style.opacity = '1';
+            setTimeout(() => {
+                document.getElementById('boss-battle-screen').style.display = 'none';
+                document.getElementById('dark-overlay').style.display = 'none';
+                const end = document.getElementById('ending');
+                end.style.display = 'flex';
+                end.style.background = 'white';
+                end.style.color = 'black';
+                end.style.opacity = '1';
+                
+                const lines = [
+                    {t: "Ничего себе...", d: 6000},
+                    {t: "Как ты дошёл до такого уровня...?", d: 6000},
+                    {t: "Я очень рад за тебя...", d: 6000},
+                    {t: "...", d: 6000},
+                    {t: "Хочу тебе рассказать одну новость.", d: 6000},
+                    {t: "Будь осторожнее, и не заходи в эту зону...", d: 6000}
+                ];
+                
+                let i = 0;
+                function step() {
+                    if (i < lines.length) {
+                        end.innerText = lines[i].t;
+                        setTimeout(() => { i++; step(); }, lines[i].d);
+                    } else {
+                        end.innerHTML = `
+                            <div style="font-size:80px; font-weight:bold; margin-bottom:20px;">THE END</div>
+                            <div style="color:green; font-size:40px; font-weight:bold; animation: glow 2s infinite alternate;">ХОРОШАЯ КОНЦВОКА...</div>
+                            <style>@keyframes glow { from { text-shadow: 0 0 5px #82c91e; } to { text-shadow: 0 0 20px #82c91e; } }</style>
+                        `;
+                    }
+                }
+                step();
+            }, 1000);
         }, 2000);
     }
 
-    function unlockBossCheat() { money = 98000; cls(); openW('info-m'); }
-
-    function startGo(type) { 
-        if(isBanned) { document.getElementById('err-text').innerText = "Извините, как так ваша репутация упала, нам пришлось забрать ваши права на приобретение новых садов. Вы больше не сможете владеть не единым садом."; openW('err-m'); return; }
-        if(money >= 500) { cls(); isPlacing = type || 'garden'; document.getElementById('placement-hint').innerText = "Выберите своё местоположение, чтобы начать выращивать сад."; document.getElementById('placement-hint').style.display='block'; } 
+    function unlockBossCheat() {
+        money = 98001;
+        update();
+        cls();
+        showPop("ДОСТУП К БОССУ ОТКРЫТ", "red");
+        startDarkZoneSequence();
     }
-    
+
     function startEnd() {
         cls(); const screen = document.getElementById('game-screen'); const end = document.getElementById('ending');
         screen.style.transition = 'opacity 5s'; screen.style.opacity = '0';
@@ -721,11 +843,11 @@
         alertBox.style.display = 'block';
         setTimeout(() => { alertBox.style.top = '20px'; }, 50);
         
-        robberyTimeInterval = setInterval(() => {
+        robberyTimerInterval = setInterval(() => {
             robberyTimeLeft--;
             document.getElementById('robbery-timer').innerText = robberyTimeLeft;
             if(robberyTimeLeft <= 0) {
-                clearInterval(robberyTimeInterval);
+                clearInterval(robberyTimerInterval);
                 const alertBox = document.getElementById('robbery-alert');
                 alertBox.style.transition = "top 1s ease-in";
                 alertBox.style.top = "-1000px";
@@ -754,14 +876,14 @@
     function stopRobbery(isAuto = false) {
         if(!isAuto) {
             isRobberyActive = false;
-            clearInterval(robberyInterval); clearInterval(robberyTimeInterval);
+            clearInterval(robberyInterval); clearInterval(robberyTimerInterval);
             const alertBox = document.getElementById('robbery-alert');
             alertBox.style.top = '-400px';
             setTimeout(() => { alertBox.style.display = 'none'; }, 500);
             showPop("ОТБИТО!", "#82c91e");
         } else {
             isRobberyActive = false;
-            clearInterval(robberyInterval); clearInterval(robberyTimeInterval);
+            clearInterval(robberyInterval); clearInterval(robberyTimerInterval);
         }
         robberyGardenIdx = null; update();
     }
@@ -832,4 +954,3 @@
 </script>
 </body>
 </html>
-
