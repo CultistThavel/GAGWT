@@ -48,7 +48,7 @@
         .garden-plot, .antenna-plot { position: absolute; width: 140px; height: 140px; border: 6px solid white; transform: translate(-50%, -50%); cursor: pointer; background: rgba(255,255,255,0.3); display: flex; justify-content: center; align-items: center; border-radius: 20px; }
         .garden-plot span, .antenna-plot span { font-size: 90px !important; }
         #placement-hint { display: none; position: absolute; bottom: 250px; left: 50%; transform: translateX(-50%); background: white; padding: 20px 40px; border-radius: 20px; border: 6px solid #000; font-weight: bold; font-size: 24px; z-index: 1000; text-align: center; box-shadow: 0 10px 0 #ddd; color: black; max-width: 80%; }
-        #ending { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: black; z-index: 10000; color: white; flex-direction: column; justify-content: center; align-items: center; text-align: center; font-size: 35px; padding: 40px; line-height: 1.6; transition: opacity 3s; opacity: 0; box-sizing: border-box; }
+        #ending { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: white; z-index: 10000; color: black; flex-direction: column; justify-content: center; align-items: center; text-align: center; font-size: 35px; padding: 40px; line-height: 1.6; transition: opacity 3s; opacity: 0; box-sizing: border-box; }
         button { font-size: 18px !important; }
         
         #robbery-alert { display: none; position: absolute; top: -400px; left: 50%; transform: translateX(-50%); width: 500px; background: white; border: 8px solid #ff4d4d; border-radius: 25px; padding: 20px; z-index: 4000; transition: top 0.8s cubic-bezier(0.6, -0.28, 0.735, 0.045); box-shadow: 0 20px 0 rgba(0,0,0,0.2); }
@@ -574,7 +574,7 @@
     function cls() { document.querySelectorAll('.modal').forEach(m => m.style.display='none'); activeGardenIdx = null; activeAntIdx = null; }
     function clsOne(id) { document.getElementById(id).style.display = 'none'; }
 
-    // ЛОГИКА ТЕМНОЙ ЗОНЫ И БОСС ФАЙТА 2.0 (ФИКС ТАПКА И АТАК)
+    // ФИКС БОСС ФАЙТА - ПОБЕДА И ПРОИГРЫШ (ОБНОВЛЕННЫЕ ДИАЛОГИ)
     function startDarkZoneSequence() {
         cls();
         document.getElementById('dark-overlay').style.display = 'block';
@@ -631,14 +631,14 @@
 
     function startBattleLoop() {
         isFighting = true;
-        bossHP = 20000; // ОБНОВЛЕНО ХП БОССА
+        bossHP = 20000;
         playerHP = 250;
         updateBossUI();
         
         const bossInterval = setInterval(() => {
             if(!isFighting) { clearInterval(bossInterval); return; }
             bossAttack();
-        }, 6000); // ОБНОВЛЕНО: ТАЙМИНГ АТАКИ БОССА
+        }, 6000);
     }
 
     function updateBossUI() {
@@ -736,75 +736,82 @@
 
     function loseBattle() {
         isFighting = false;
-        const diag = document.getElementById('dialog-text');
-        diag.style.display = 'block';
-        diag.style.opacity = "1";
-        diag.style.top = "50%";
+        document.getElementById('white-flash').style.display = 'block';
+        document.getElementById('white-flash').style.opacity = '1';
         
-        const lines = [
-            {t: "Извини меня.", d: 4000},
-            {t: "Это игра с самого начала была песочницей", d: 6000},
-            {t: "Просыпайся.", d: 6000}
-        ];
-        
-        let i = 0;
-        function step() {
-            if (i < lines.length) {
-                diag.innerText = lines[i].t;
-                setTimeout(() => { i++; step(); }, lines[i].d);
-            } else {
-                document.getElementById('white-flash').style.display = 'flex';
-                document.getElementById('white-flash').style.opacity = '1';
-                setTimeout(() => location.reload(), 2000);
+        setTimeout(() => {
+            const end = document.getElementById('ending');
+            end.style.display = 'flex';
+            end.style.background = 'white';
+            end.style.color = 'black';
+            end.style.opacity = '1';
+            
+            const lines = [
+                {t: "Нет.", d: 5000},
+                {t: "Ты не можешь сдаться.", d: 5000},
+                {t: "Одолей его!", d: 5000},
+                {t: "Ну же! Просыпайся!", d: 5000}
+            ];
+            
+            let i = 0;
+            function step() {
+                if (i < lines.length) {
+                    end.style.transition = "opacity 0.5s";
+                    end.style.opacity = "1";
+                    end.innerText = lines[i].t;
+                    setTimeout(() => { 
+                        if (i === lines.length - 1) {
+                            end.style.transition = "opacity 4s";
+                            end.style.opacity = "0";
+                            setTimeout(() => location.reload(), 4000);
+                        } else {
+                            i++; step(); 
+                        }
+                    }, lines[i].d);
+                }
             }
-        }
-        step();
+            step();
+        }, 1000);
     }
 
     function winBattle() {
         isFighting = false;
-        const bImg = document.getElementById('boss-img');
-        bImg.style.transition = "all 2s";
-        bImg.style.top = "-500px";
-        bImg.style.filter = "brightness(5) contrast(0)";
+        document.getElementById('white-flash').style.display = 'block';
+        document.getElementById('white-flash').style.opacity = '1';
         
         setTimeout(() => {
-            document.getElementById('white-flash').style.display = 'block';
-            document.getElementById('white-flash').style.opacity = '1';
-            setTimeout(() => {
-                document.getElementById('boss-battle-screen').style.display = 'none';
-                document.getElementById('dark-overlay').style.display = 'none';
-                const end = document.getElementById('ending');
-                end.style.display = 'flex';
-                end.style.background = 'white';
-                end.style.color = 'black';
-                end.style.opacity = '1';
-                
-                const lines = [
-                    {t: "Ничего себе...", d: 6000},
-                    {t: "Как ты дошёл до такого уровня...?", d: 6000},
-                    {t: "Я очень рад за тебя...", d: 6000},
-                    {t: "...", d: 6000},
-                    {t: "Хочу тебе рассказать одну новость.", d: 6000},
-                    {t: "Будь осторожнее, и не заходи в эту зону...", d: 6000}
-                ];
-                
-                let i = 0;
-                function step() {
-                    if (i < lines.length) {
-                        end.innerText = lines[i].t;
-                        setTimeout(() => { i++; step(); }, lines[i].d);
-                    } else {
-                        end.innerHTML = `
-                            <div style="font-size:80px; font-weight:bold; margin-bottom:20px;">THE END</div>
-                            <div style="color:green; font-size:40px; font-weight:bold; animation: glow 2s infinite alternate;">ХОРОШАЯ КОНЦВОКА...</div>
-                            <style>@keyframes glow { from { text-shadow: 0 0 5px #82c91e; } to { text-shadow: 0 0 20px #82c91e; } }</style>
-                        `;
-                    }
+            document.getElementById('boss-battle-screen').style.display = 'none';
+            const end = document.getElementById('ending');
+            end.style.display = 'flex';
+            end.style.background = 'white';
+            end.style.color = 'black';
+            end.style.opacity = '1';
+            
+            const lines = [
+                {t: "Ахринеть...", d: 6000},
+                {t: "Как ты дошёл до этой зоны...?", d: 6000},
+                {t: "Не знаю как к тебе обращаться, но слушай, игрок. Ты только что разрушил вселенную этой игры. ", d: 6000},
+                {t: "Сейчас ты в пустоте, и да, можно тебе рассказать одну новость?", d: 6000},
+                {t: "Ты официально прошёл эту игру, ты умнее игры. Я думал, что ты навсегда застрянешь в ней.", d: 6000},
+                {t: "Больше не заходи в эту зону, она разрушена.", d: 6000}
+            ];
+            
+            let i = 0;
+            function step() {
+                if (i < lines.length) {
+                    end.innerText = lines[i].t;
+                    setTimeout(() => { i++; step(); }, lines[i].d);
+                } else {
+                    end.innerHTML = `
+                        <div style="font-size:80px; font-weight:bold; margin-bottom:20px;">THE END.</div>
+                        <div style="color:green; font-size:40px; font-weight:bold; animation: glowEnd 2s infinite alternate;">Хорошая Концовка.</div>
+                        <div style="color:black; font-size:24px; margin-top:30px;">Спасибо за игру! Проект был сделан пользователем: @Xn1ckname.</div>
+                        <style>@keyframes glowEnd { from { text-shadow: 0 0 5px #00ff00; color: #00ff00; } to { text-shadow: 0 0 25px #00ff00; color: #32cd32; } }</style>
+                    `;
                 }
-                step();
-            }, 1000);
-        }, 2000);
+            }
+            step();
+        }, 1000);
     }
 
     function unlockBossCheat() {
